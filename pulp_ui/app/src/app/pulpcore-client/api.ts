@@ -1047,10 +1047,10 @@ export interface PatchedPulpImporter {
     name?: string;
     /**
      * Mapping of repo names in an export file to the repo names in Pulp. For example, if the export has a repo named \'foo\' and the repo to import content into was \'bar\', the mapping would be \"{\'foo\': \'bar\'}\".
-     * @type {object}
+     * @type {{ [key: string]: string; }}
      * @memberof PatchedPulpImporter
      */
-    repo_mapping?: object;
+    repo_mapping?: { [key: string]: string; };
 }
 /**
  * Base serializer for use with :class:`pulpcore.app.models.Model`  This ensures that all Serializers provide values for the \'pulp_href` field.  The class provides a default for the ``ref_name`` attribute in the ModelSerializers\'s ``Meta`` class. This ensures that the OpenAPI definitions of plugins are namespaced properly.
@@ -1388,10 +1388,10 @@ export interface PulpImporter {
     name: string;
     /**
      * Mapping of repo names in an export file to the repo names in Pulp. For example, if the export has a repo named \'foo\' and the repo to import content into was \'bar\', the mapping would be \"{\'foo\': \'bar\'}\".
-     * @type {object}
+     * @type {{ [key: string]: string; }}
      * @memberof PulpImporter
      */
-    repo_mapping?: object;
+    repo_mapping?: { [key: string]: string; };
 }
 /**
  * Serializer for PulpImporters.
@@ -1419,10 +1419,10 @@ export interface PulpImporterResponse {
     name: string;
     /**
      * Mapping of repo names in an export file to the repo names in Pulp. For example, if the export has a repo named \'foo\' and the repo to import content into was \'bar\', the mapping would be \"{\'foo\': \'bar\'}\".
-     * @type {object}
+     * @type {{ [key: string]: string; }}
      * @memberof PulpImporterResponse
      */
-    repo_mapping?: object;
+    repo_mapping?: { [key: string]: string; };
 }
 /**
  * Serializer for information about the Redis connection
@@ -1485,6 +1485,12 @@ export interface RepositoryResponse {
      * @memberof RepositoryResponse
      */
     description?: string | null;
+    /**
+     * Retain X versions of the repository. Default is null which retains all versions. This is provided as a tech preview in Pulp 3 and may change in the future.
+     * @type {number}
+     * @memberof RepositoryResponse
+     */
+    retained_versions?: number | null;
     /**
      * 
      * @type {string}
@@ -1720,10 +1726,10 @@ export interface TaskResponse {
     finished_at?: string;
     /**
      * A JSON Object of a fatal error encountered during the execution of this task.
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof TaskResponse
      */
-    error?: object;
+    error?: { [key: string]: object; };
     /**
      * The worker associated with this task. This field is empty if a worker is not yet assigned.
      * @type {string}
@@ -1992,17 +1998,17 @@ export interface VersionResponse {
  */
 export interface WorkerResponse {
     /**
-     * 
-     * @type {string}
-     * @memberof WorkerResponse
-     */
-    pulp_href?: string;
-    /**
      * Timestamp of creation.
      * @type {string}
      * @memberof WorkerResponse
      */
     pulp_created?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkerResponse
+     */
+    pulp_href?: string;
     /**
      * The name of the worker.
      * @type {string}
@@ -2026,21 +2032,21 @@ export const AccessPoliciesApiAxiosParamCreator = function (configuration?: Conf
         /**
          * ViewSet for AccessPolicy.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List access policys
-         * @param {string} [customized] customized
+         * @param {boolean} [customized] 
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [viewsetName] viewset_name
-         * @param {string} [viewsetNameContains] viewset_name__contains
-         * @param {string} [viewsetNameIcontains] viewset_name__icontains
-         * @param {string} [viewsetNameIn] viewset_name__in
-         * @param {string} [viewsetNameStartswith] viewset_name__startswith
+         * @param {string} [viewsetName] Filter results where viewset_name matches value
+         * @param {string} [viewsetNameContains] Filter results where viewset_name contains value
+         * @param {string} [viewsetNameIcontains] Filter results where viewset_name contains value
+         * @param {Array<string>} [viewsetNameIn] Filter results where viewset_name is in a comma-separated list of values
+         * @param {string} [viewsetNameStartswith] Filter results where viewset_name starts with value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (customized?: string, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: string, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (customized?: boolean, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: Array<string>, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/access_policies/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -2089,8 +2095,8 @@ export const AccessPoliciesApiAxiosParamCreator = function (configuration?: Conf
                 localVarQueryParameter['viewset_name__icontains'] = viewsetNameIcontains;
             }
 
-            if (viewsetNameIn !== undefined) {
-                localVarQueryParameter['viewset_name__in'] = viewsetNameIn;
+            if (viewsetNameIn) {
+                localVarQueryParameter['viewset_name__in'] = viewsetNameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (viewsetNameStartswith !== undefined) {
@@ -2326,21 +2332,21 @@ export const AccessPoliciesApiFp = function(configuration?: Configuration) {
         /**
          * ViewSet for AccessPolicy.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List access policys
-         * @param {string} [customized] customized
+         * @param {boolean} [customized] 
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [viewsetName] viewset_name
-         * @param {string} [viewsetNameContains] viewset_name__contains
-         * @param {string} [viewsetNameIcontains] viewset_name__icontains
-         * @param {string} [viewsetNameIn] viewset_name__in
-         * @param {string} [viewsetNameStartswith] viewset_name__startswith
+         * @param {string} [viewsetName] Filter results where viewset_name matches value
+         * @param {string} [viewsetNameContains] Filter results where viewset_name contains value
+         * @param {string} [viewsetNameIcontains] Filter results where viewset_name contains value
+         * @param {Array<string>} [viewsetNameIn] Filter results where viewset_name is in a comma-separated list of values
+         * @param {string} [viewsetNameStartswith] Filter results where viewset_name starts with value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(customized?: string, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: string, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAccessPolicyResponseList>> {
+        async list(customized?: boolean, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: Array<string>, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAccessPolicyResponseList>> {
             const localVarAxiosArgs = await AccessPoliciesApiAxiosParamCreator(configuration).list(customized, limit, offset, ordering, viewsetName, viewsetNameContains, viewsetNameIcontains, viewsetNameIn, viewsetNameStartswith, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -2405,21 +2411,21 @@ export const AccessPoliciesApiFactory = function (configuration?: Configuration,
         /**
          * ViewSet for AccessPolicy.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List access policys
-         * @param {string} [customized] customized
+         * @param {boolean} [customized] 
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [viewsetName] viewset_name
-         * @param {string} [viewsetNameContains] viewset_name__contains
-         * @param {string} [viewsetNameIcontains] viewset_name__icontains
-         * @param {string} [viewsetNameIn] viewset_name__in
-         * @param {string} [viewsetNameStartswith] viewset_name__startswith
+         * @param {string} [viewsetName] Filter results where viewset_name matches value
+         * @param {string} [viewsetNameContains] Filter results where viewset_name contains value
+         * @param {string} [viewsetNameIcontains] Filter results where viewset_name contains value
+         * @param {Array<string>} [viewsetNameIn] Filter results where viewset_name is in a comma-separated list of values
+         * @param {string} [viewsetNameStartswith] Filter results where viewset_name starts with value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(customized?: string, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: string, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedAccessPolicyResponseList> {
+        list(customized?: boolean, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: Array<string>, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedAccessPolicyResponseList> {
             return AccessPoliciesApiFp(configuration).list(customized, limit, offset, ordering, viewsetName, viewsetNameContains, viewsetNameIcontains, viewsetNameIn, viewsetNameStartswith, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2469,22 +2475,22 @@ export class AccessPoliciesApi extends BaseAPI {
     /**
      * ViewSet for AccessPolicy.  NOTE: This API endpoint is in \"tech preview\" and subject to change
      * @summary List access policys
-     * @param {string} [customized] customized
+     * @param {boolean} [customized] 
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [viewsetName] viewset_name
-     * @param {string} [viewsetNameContains] viewset_name__contains
-     * @param {string} [viewsetNameIcontains] viewset_name__icontains
-     * @param {string} [viewsetNameIn] viewset_name__in
-     * @param {string} [viewsetNameStartswith] viewset_name__startswith
+     * @param {string} [viewsetName] Filter results where viewset_name matches value
+     * @param {string} [viewsetNameContains] Filter results where viewset_name contains value
+     * @param {string} [viewsetNameIcontains] Filter results where viewset_name contains value
+     * @param {Array<string>} [viewsetNameIn] Filter results where viewset_name is in a comma-separated list of values
+     * @param {string} [viewsetNameStartswith] Filter results where viewset_name starts with value
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AccessPoliciesApi
      */
-    public list(customized?: string, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: string, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(customized?: boolean, limit?: number, offset?: number, ordering?: string, viewsetName?: string, viewsetNameContains?: string, viewsetNameIcontains?: string, viewsetNameIn?: Array<string>, viewsetNameStartswith?: string, fields?: string, excludeFields?: string, options?: any) {
         return AccessPoliciesApiFp(this.configuration).list(customized, limit, offset, ordering, viewsetName, viewsetNameContains, viewsetNameIcontains, viewsetNameIn, viewsetNameStartswith, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2684,15 +2690,15 @@ export const ArtifactsApiAxiosParamCreator = function (configuration?: Configura
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List artifacts
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [md5] md5
+         * @param {string} [md5] Filter results where md5 matches value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [sha1] sha1
-         * @param {string} [sha224] sha224
-         * @param {string} [sha256] sha256
-         * @param {string} [sha384] sha384
-         * @param {string} [sha512] sha512
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [sha1] Filter results where sha1 matches value
+         * @param {string} [sha224] Filter results where sha224 matches value
+         * @param {string} [sha256] Filter results where sha256 matches value
+         * @param {string} [sha384] Filter results where sha384 matches value
+         * @param {string} [sha512] Filter results where sha512 matches value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -2894,15 +2900,15 @@ export const ArtifactsApiFp = function(configuration?: Configuration) {
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List artifacts
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [md5] md5
+         * @param {string} [md5] Filter results where md5 matches value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [sha1] sha1
-         * @param {string} [sha224] sha224
-         * @param {string} [sha256] sha256
-         * @param {string} [sha384] sha384
-         * @param {string} [sha512] sha512
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [sha1] Filter results where sha1 matches value
+         * @param {string} [sha224] Filter results where sha224 matches value
+         * @param {string} [sha256] Filter results where sha256 matches value
+         * @param {string} [sha384] Filter results where sha384 matches value
+         * @param {string} [sha512] Filter results where sha512 matches value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -2971,15 +2977,15 @@ export const ArtifactsApiFactory = function (configuration?: Configuration, base
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List artifacts
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [md5] md5
+         * @param {string} [md5] Filter results where md5 matches value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [sha1] sha1
-         * @param {string} [sha224] sha224
-         * @param {string} [sha256] sha256
-         * @param {string} [sha384] sha384
-         * @param {string} [sha512] sha512
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [sha1] Filter results where sha1 matches value
+         * @param {string} [sha224] Filter results where sha224 matches value
+         * @param {string} [sha256] Filter results where sha256 matches value
+         * @param {string} [sha384] Filter results where sha384 matches value
+         * @param {string} [sha512] Filter results where sha512 matches value
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -3045,15 +3051,15 @@ export class ArtifactsApi extends BaseAPI {
      * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
      * @summary List artifacts
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [md5] md5
+     * @param {string} [md5] Filter results where md5 matches value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [repositoryVersion] repository_version
-     * @param {string} [sha1] sha1
-     * @param {string} [sha224] sha224
-     * @param {string} [sha256] sha256
-     * @param {string} [sha384] sha384
-     * @param {string} [sha512] sha512
+     * @param {string} [repositoryVersion] Repository Version referenced by HREF
+     * @param {string} [sha1] Filter results where sha1 matches value
+     * @param {string} [sha224] Filter results where sha224 matches value
+     * @param {string} [sha256] Filter results where sha256 matches value
+     * @param {string} [sha384] Filter results where sha384 matches value
+     * @param {string} [sha512] Filter results where sha512 matches value
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
@@ -3092,9 +3098,9 @@ export const ContentApiAxiosParamCreator = function (configuration?: Configurati
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -3186,9 +3192,9 @@ export const ContentApiFp = function(configuration?: Configuration) {
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -3216,9 +3222,9 @@ export const ContentApiFactory = function (configuration?: Configuration, basePa
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -3243,9 +3249,9 @@ export class ContentApi extends BaseAPI {
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [repositoryVersion] repository_version
-     * @param {string} [repositoryVersionAdded] repository_version_added
-     * @param {string} [repositoryVersionRemoved] repository_version_removed
+     * @param {string} [repositoryVersion] Repository Version referenced by HREF
+     * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+     * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
@@ -3259,20 +3265,20 @@ export class ContentApi extends BaseAPI {
 
 
 /**
- * ContentGuardsApi - axios parameter creator
+ * ContentguardsApi - axios parameter creator
  * @export
  */
-export const ContentGuardsApiAxiosParamCreator = function (configuration?: Configuration) {
+export const ContentguardsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Endpoint to list all content_guards.
+         * Endpoint to list all contentguards.
          * @summary List content guards
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3280,8 +3286,8 @@ export const ContentGuardsApiAxiosParamCreator = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/pulp/api/v3/content_guards/`;
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/pulp/api/v3/contentguards/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;
@@ -3317,8 +3323,8 @@ export const ContentGuardsApiAxiosParamCreator = function (configuration?: Confi
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -3363,20 +3369,20 @@ export const ContentGuardsApiAxiosParamCreator = function (configuration?: Confi
 };
 
 /**
- * ContentGuardsApi - functional programming interface
+ * ContentguardsApi - functional programming interface
  * @export
  */
-export const ContentGuardsApiFp = function(configuration?: Configuration) {
+export const ContentguardsApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Endpoint to list all content_guards.
+         * Endpoint to list all contentguards.
          * @summary List content guards
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3384,8 +3390,8 @@ export const ContentGuardsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedContentGuardResponseList>> {
-            const localVarAxiosArgs = await ContentGuardsApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options);
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedContentGuardResponseList>> {
+            const localVarAxiosArgs = await ContentguardsApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
                 return axios.request(axiosRequestArgs);
@@ -3395,20 +3401,20 @@ export const ContentGuardsApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * ContentGuardsApi - factory interface
+ * ContentguardsApi - factory interface
  * @export
  */
-export const ContentGuardsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+export const ContentguardsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     return {
         /**
-         * Endpoint to list all content_guards.
+         * Endpoint to list all contentguards.
          * @summary List content guards
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3416,38 +3422,38 @@ export const ContentGuardsApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedContentGuardResponseList> {
-            return ContentGuardsApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedContentGuardResponseList> {
+            return ContentguardsApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
- * ContentGuardsApi - object-oriented interface
+ * ContentguardsApi - object-oriented interface
  * @export
- * @class ContentGuardsApi
+ * @class ContentguardsApi
  * @extends {BaseAPI}
  */
-export class ContentGuardsApi extends BaseAPI {
+export class ContentguardsApi extends BaseAPI {
     /**
-     * Endpoint to list all content_guards.
+     * Endpoint to list all contentguards.
      * @summary List content guards
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ContentGuardsApi
+     * @memberof ContentguardsApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
-        return ContentGuardsApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+        return ContentguardsApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -3916,7 +3922,7 @@ export class ExportersCoreExportsApi extends BaseAPI {
 export const ExportersPulpApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous delete task
          * @summary Delete a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {*} [options] Override http request option.
@@ -4029,11 +4035,11 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
          * ViewSet for viewing PulpExporters.
          * @summary List pulp exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -4041,7 +4047,7 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/exporters/core/pulp/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -4078,8 +4084,8 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -4121,7 +4127,7 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous partial update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PatchedPulpExporter} patchedPulpExporter 
@@ -4247,7 +4253,7 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PulpExporter} pulpExporter 
@@ -4321,13 +4327,13 @@ export const ExportersPulpApiAxiosParamCreator = function (configuration?: Confi
 export const ExportersPulpApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous delete task
          * @summary Delete a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async _delete(pulpExporterHref: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async _delete(pulpExporterHref: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersPulpApiAxiosParamCreator(configuration)._delete(pulpExporterHref, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -4352,11 +4358,11 @@ export const ExportersPulpApiFp = function(configuration?: Configuration) {
          * ViewSet for viewing PulpExporters.
          * @summary List pulp exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -4364,7 +4370,7 @@ export const ExportersPulpApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedPulpExporterResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedPulpExporterResponseList>> {
             const localVarAxiosArgs = await ExportersPulpApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -4372,14 +4378,14 @@ export const ExportersPulpApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous partial update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PatchedPulpExporter} patchedPulpExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async partialUpdate(pulpExporterHref: string, patchedPulpExporter: PatchedPulpExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PulpExporterResponse>> {
+        async partialUpdate(pulpExporterHref: string, patchedPulpExporter: PatchedPulpExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersPulpApiAxiosParamCreator(configuration).partialUpdate(pulpExporterHref, patchedPulpExporter, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -4403,14 +4409,14 @@ export const ExportersPulpApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PulpExporter} pulpExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async update(pulpExporterHref: string, pulpExporter: PulpExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PulpExporterResponse>> {
+        async update(pulpExporterHref: string, pulpExporter: PulpExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersPulpApiAxiosParamCreator(configuration).update(pulpExporterHref, pulpExporter, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -4427,13 +4433,13 @@ export const ExportersPulpApiFp = function(configuration?: Configuration) {
 export const ExportersPulpApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     return {
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous delete task
          * @summary Delete a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        _delete(pulpExporterHref: string, options?: any): AxiosPromise<void> {
+        _delete(pulpExporterHref: string, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersPulpApiFp(configuration)._delete(pulpExporterHref, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4450,11 +4456,11 @@ export const ExportersPulpApiFactory = function (configuration?: Configuration, 
          * ViewSet for viewing PulpExporters.
          * @summary List pulp exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -4462,18 +4468,18 @@ export const ExportersPulpApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedPulpExporterResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedPulpExporterResponseList> {
             return ExportersPulpApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous partial update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PatchedPulpExporter} patchedPulpExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        partialUpdate(pulpExporterHref: string, patchedPulpExporter: PatchedPulpExporter, options?: any): AxiosPromise<PulpExporterResponse> {
+        partialUpdate(pulpExporterHref: string, patchedPulpExporter: PatchedPulpExporter, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersPulpApiFp(configuration).partialUpdate(pulpExporterHref, patchedPulpExporter, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4489,14 +4495,14 @@ export const ExportersPulpApiFactory = function (configuration?: Configuration, 
             return ExportersPulpApiFp(configuration).read(pulpExporterHref, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
-         * ViewSet for viewing PulpExporters.
+         * Trigger an asynchronous update task
          * @summary Update a pulp exporter
          * @param {string} pulpExporterHref 
          * @param {PulpExporter} pulpExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(pulpExporterHref: string, pulpExporter: PulpExporter, options?: any): AxiosPromise<PulpExporterResponse> {
+        update(pulpExporterHref: string, pulpExporter: PulpExporter, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersPulpApiFp(configuration).update(pulpExporterHref, pulpExporter, options).then((request) => request(axios, basePath));
         },
     };
@@ -4510,7 +4516,7 @@ export const ExportersPulpApiFactory = function (configuration?: Configuration, 
  */
 export class ExportersPulpApi extends BaseAPI {
     /**
-     * ViewSet for viewing PulpExporters.
+     * Trigger an asynchronous delete task
      * @summary Delete a pulp exporter
      * @param {string} pulpExporterHref 
      * @param {*} [options] Override http request option.
@@ -4537,11 +4543,11 @@ export class ExportersPulpApi extends BaseAPI {
      * ViewSet for viewing PulpExporters.
      * @summary List pulp exporters
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
@@ -4550,12 +4556,12 @@ export class ExportersPulpApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ExportersPulpApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
         return ExportersPulpApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * ViewSet for viewing PulpExporters.
+     * Trigger an asynchronous partial update task
      * @summary Update a pulp exporter
      * @param {string} pulpExporterHref 
      * @param {PatchedPulpExporter} patchedPulpExporter 
@@ -4582,7 +4588,7 @@ export class ExportersPulpApi extends BaseAPI {
     }
 
     /**
-     * ViewSet for viewing PulpExporters.
+     * Trigger an asynchronous update task
      * @summary Update a pulp exporter
      * @param {string} pulpExporterHref 
      * @param {PulpExporter} pulpExporter 
@@ -4715,14 +4721,14 @@ export const GroupsApiAxiosParamCreator = function (configuration?: Configuratio
         /**
          * ViewSet for Group.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List groups
-         * @param {string} [id] id
-         * @param {string} [idIn] id__in
+         * @param {number} [id] Filter results where id matches value
+         * @param {Array<number>} [idIn] Filter results where id is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIexact] name__iexact
-         * @param {string} [nameIn] name__in
+         * @param {string} [name] Filter results where name matches value
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {string} [nameIexact] Filter results where name matches value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -4730,7 +4736,7 @@ export const GroupsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (id?: string, idIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (id?: number, idIn?: Array<number>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: Array<string>, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/groups/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -4755,8 +4761,8 @@ export const GroupsApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['id'] = id;
             }
 
-            if (idIn !== undefined) {
-                localVarQueryParameter['id__in'] = idIn;
+            if (idIn) {
+                localVarQueryParameter['id__in'] = idIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (limit !== undefined) {
@@ -4779,8 +4785,8 @@ export const GroupsApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['name__iexact'] = nameIexact;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (offset !== undefined) {
@@ -5048,14 +5054,14 @@ export const GroupsApiFp = function(configuration?: Configuration) {
         /**
          * ViewSet for Group.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List groups
-         * @param {string} [id] id
-         * @param {string} [idIn] id__in
+         * @param {number} [id] Filter results where id matches value
+         * @param {Array<number>} [idIn] Filter results where id is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIexact] name__iexact
-         * @param {string} [nameIn] name__in
+         * @param {string} [name] Filter results where name matches value
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {string} [nameIexact] Filter results where name matches value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -5063,7 +5069,7 @@ export const GroupsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(id?: string, idIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedGroupResponseList>> {
+        async list(id?: number, idIn?: Array<number>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: Array<string>, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedGroupResponseList>> {
             const localVarAxiosArgs = await GroupsApiAxiosParamCreator(configuration).list(id, idIn, limit, name, nameContains, nameIcontains, nameIexact, nameIn, offset, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -5148,14 +5154,14 @@ export const GroupsApiFactory = function (configuration?: Configuration, basePat
         /**
          * ViewSet for Group.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List groups
-         * @param {string} [id] id
-         * @param {string} [idIn] id__in
+         * @param {number} [id] Filter results where id matches value
+         * @param {Array<number>} [idIn] Filter results where id is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIexact] name__iexact
-         * @param {string} [nameIn] name__in
+         * @param {string} [name] Filter results where name matches value
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {string} [nameIexact] Filter results where name matches value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -5163,7 +5169,7 @@ export const GroupsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(id?: string, idIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedGroupResponseList> {
+        list(id?: number, idIn?: Array<number>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: Array<string>, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedGroupResponseList> {
             return GroupsApiFp(configuration).list(id, idIn, limit, name, nameContains, nameIcontains, nameIexact, nameIn, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5237,14 +5243,14 @@ export class GroupsApi extends BaseAPI {
     /**
      * ViewSet for Group.  NOTE: This API endpoint is in \"tech preview\" and subject to change
      * @summary List groups
-     * @param {string} [id] id
-     * @param {string} [idIn] id__in
+     * @param {number} [id] Filter results where id matches value
+     * @param {Array<number>} [idIn] Filter results where id is in a comma-separated list of values
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIexact] name__iexact
-     * @param {string} [nameIn] name__in
+     * @param {string} [name] Filter results where name matches value
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {string} [nameIexact] Filter results where name matches value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
@@ -5253,7 +5259,7 @@ export class GroupsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof GroupsApi
      */
-    public list(id?: string, idIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(id?: number, idIn?: Array<number>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIexact?: string, nameIn?: Array<string>, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
         return GroupsApiFp(this.configuration).list(id, idIn, limit, name, nameContains, nameIcontains, nameIexact, nameIn, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -7275,11 +7281,11 @@ export const ImportersPulpApiAxiosParamCreator = function (configuration?: Confi
          * ViewSet for PulpImporters.
          * @summary List pulp importers
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -7287,7 +7293,7 @@ export const ImportersPulpApiAxiosParamCreator = function (configuration?: Confi
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/importers/core/pulp/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -7324,8 +7330,8 @@ export const ImportersPulpApiAxiosParamCreator = function (configuration?: Confi
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -7598,11 +7604,11 @@ export const ImportersPulpApiFp = function(configuration?: Configuration) {
          * ViewSet for PulpImporters.
          * @summary List pulp importers
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -7610,7 +7616,7 @@ export const ImportersPulpApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedPulpImporterResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedPulpImporterResponseList>> {
             const localVarAxiosArgs = await ImportersPulpApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -7696,11 +7702,11 @@ export const ImportersPulpApiFactory = function (configuration?: Configuration, 
          * ViewSet for PulpImporters.
          * @summary List pulp importers
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -7708,7 +7714,7 @@ export const ImportersPulpApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedPulpImporterResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedPulpImporterResponseList> {
             return ImportersPulpApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7783,11 +7789,11 @@ export class ImportersPulpApi extends BaseAPI {
      * ViewSet for PulpImporters.
      * @summary List pulp importers
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
@@ -7796,7 +7802,7 @@ export class ImportersPulpApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ImportersPulpApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
         return ImportersPulpApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -8080,20 +8086,20 @@ export const RepositoriesApiAxiosParamCreator = function (configuration?: Config
          * Endpoint to list all repositories.
          * @summary List repositories
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/repositories/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -8130,8 +8136,8 @@ export const RepositoriesApiAxiosParamCreator = function (configuration?: Config
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -8189,20 +8195,20 @@ export const RepositoriesApiFp = function(configuration?: Configuration) {
          * Endpoint to list all repositories.
          * @summary List repositories
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedRepositoryResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedRepositoryResponseList>> {
             const localVarAxiosArgs = await RepositoriesApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -8222,20 +8228,20 @@ export const RepositoriesApiFactory = function (configuration?: Configuration, b
          * Endpoint to list all repositories.
          * @summary List repositories
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedRepositoryResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedRepositoryResponseList> {
             return RepositoriesApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
     };
@@ -8252,21 +8258,21 @@ export class RepositoriesApi extends BaseAPI {
      * Endpoint to list all repositories.
      * @summary List repositories
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpLabelSelect] pulp_label_select
+     * @param {string} [pulpLabelSelect] Filter labels by search string
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RepositoriesApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
         return RepositoriesApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -8282,7 +8288,7 @@ export const SigningServicesApiAxiosParamCreator = function (configuration?: Con
          * A ViewSet that supports browsing of existing signing services.
          * @summary List signing services
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
+         * @param {string} [name] 
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -8427,7 +8433,7 @@ export const SigningServicesApiFp = function(configuration?: Configuration) {
          * A ViewSet that supports browsing of existing signing services.
          * @summary List signing services
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
+         * @param {string} [name] 
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -8471,7 +8477,7 @@ export const SigningServicesApiFactory = function (configuration?: Configuration
          * A ViewSet that supports browsing of existing signing services.
          * @summary List signing services
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
+         * @param {string} [name] 
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -8508,7 +8514,7 @@ export class SigningServicesApi extends BaseAPI {
      * A ViewSet that supports browsing of existing signing services.
      * @summary List signing services
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
+     * @param {string} [name] 
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
@@ -8544,7 +8550,7 @@ export class SigningServicesApi extends BaseAPI {
 export const StatusApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Returns app information including the version of pulpcore and loaded pulp plugins, known workers, database connection status, and messaging connection status
+         * Returns status and app information about Pulp.  Information includes:  * version of pulpcore and loaded pulp plugins  * known workers  * known content apps  * database connection status  * redis connection status  * disk usage information
          * @summary Inspect status of Pulp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8590,7 +8596,7 @@ export const StatusApiAxiosParamCreator = function (configuration?: Configuratio
 export const StatusApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Returns app information including the version of pulpcore and loaded pulp plugins, known workers, database connection status, and messaging connection status
+         * Returns status and app information about Pulp.  Information includes:  * version of pulpcore and loaded pulp plugins  * known workers  * known content apps  * database connection status  * redis connection status  * disk usage information
          * @summary Inspect status of Pulp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8612,7 +8618,7 @@ export const StatusApiFp = function(configuration?: Configuration) {
 export const StatusApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     return {
         /**
-         * Returns app information including the version of pulpcore and loaded pulp plugins, known workers, database connection status, and messaging connection status
+         * Returns status and app information about Pulp.  Information includes:  * version of pulpcore and loaded pulp plugins  * known workers  * known content apps  * database connection status  * redis connection status  * disk usage information
          * @summary Inspect status of Pulp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8631,7 +8637,7 @@ export const StatusApiFactory = function (configuration?: Configuration, basePat
  */
 export class StatusApi extends BaseAPI {
     /**
-     * Returns app information including the version of pulpcore and loaded pulp plugins, known workers, database connection status, and messaging connection status
+     * Returns status and app information about Pulp.  Information includes:  * version of pulpcore and loaded pulp plugins  * known workers  * known content apps  * database connection status  * redis connection status  * disk usage information
      * @summary Inspect status of Pulp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -8960,38 +8966,38 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List tasks
-         * @param {string} [childTasks] child_tasks
-         * @param {string} [createdResources] created_resources
-         * @param {string} [finishedAt] finished_at
-         * @param {string} [finishedAtGt] finished_at__gt
-         * @param {string} [finishedAtGte] finished_at__gte
-         * @param {string} [finishedAtLt] finished_at__lt
-         * @param {string} [finishedAtLte] finished_at__lte
-         * @param {string} [finishedAtRange] finished_at__range
+         * @param {string} [childTasks] Foreign Key referenced by HREF
+         * @param {string} [createdResources] 
+         * @param {string} [finishedAt] ISO 8601 formatted dates are supported
+         * @param {string} [finishedAtGt] Filter results where finished_at is greater than value
+         * @param {string} [finishedAtGte] Filter results where finished_at is greater than or equal to value
+         * @param {string} [finishedAtLt] Filter results where finished_at is less than value
+         * @param {string} [finishedAtLte] Filter results where finished_at is less than or equal to value
+         * @param {Array<string>} [finishedAtRange] Filter results where finished_at is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [parentTask] parent_task
-         * @param {string} [reservedResourcesRecord] reserved_resources_record
-         * @param {string} [startedAt] started_at
-         * @param {string} [startedAtGt] started_at__gt
-         * @param {string} [startedAtGte] started_at__gte
-         * @param {string} [startedAtLt] started_at__lt
-         * @param {string} [startedAtLte] started_at__lte
-         * @param {string} [startedAtRange] started_at__range
-         * @param {string} [state] state
-         * @param {string} [stateIn] state__in
-         * @param {string} [taskGroup] task_group
-         * @param {string} [worker] worker
-         * @param {string} [workerIn] worker__in
+         * @param {string} [parentTask] Foreign Key referenced by HREF
+         * @param {string} [reservedResourcesRecord] 
+         * @param {string} [startedAt] ISO 8601 formatted dates are supported
+         * @param {string} [startedAtGt] Filter results where started_at is greater than value
+         * @param {string} [startedAtGte] Filter results where started_at is greater than or equal to value
+         * @param {string} [startedAtLt] Filter results where started_at is less than value
+         * @param {string} [startedAtLte] Filter results where started_at is less than or equal to value
+         * @param {Array<string>} [startedAtRange] Filter results where started_at is between two comma separated values
+         * @param {'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting'} [state] 
+         * @param {Array<string>} [stateIn] Filter results where state is in a comma-separated list of values
+         * @param {string} [taskGroup] Foreign Key referenced by HREF
+         * @param {string} [worker] Foreign Key referenced by HREF
+         * @param {Array<string>} [workerIn] Filter results where worker is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: string, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: string, state?: string, stateIn?: string, taskGroup?: string, worker?: string, workerIn?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: Array<string>, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: Array<string>, state?: 'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting', stateIn?: Array<string>, taskGroup?: string, worker?: string, workerIn?: Array<string>, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/tasks/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -9021,27 +9027,37 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
             }
 
             if (finishedAt !== undefined) {
-                localVarQueryParameter['finished_at'] = finishedAt;
+                localVarQueryParameter['finished_at'] = (finishedAt as any instanceof Date) ?
+                    (finishedAt as any).toISOString() :
+                    finishedAt;
             }
 
             if (finishedAtGt !== undefined) {
-                localVarQueryParameter['finished_at__gt'] = finishedAtGt;
+                localVarQueryParameter['finished_at__gt'] = (finishedAtGt as any instanceof Date) ?
+                    (finishedAtGt as any).toISOString() :
+                    finishedAtGt;
             }
 
             if (finishedAtGte !== undefined) {
-                localVarQueryParameter['finished_at__gte'] = finishedAtGte;
+                localVarQueryParameter['finished_at__gte'] = (finishedAtGte as any instanceof Date) ?
+                    (finishedAtGte as any).toISOString() :
+                    finishedAtGte;
             }
 
             if (finishedAtLt !== undefined) {
-                localVarQueryParameter['finished_at__lt'] = finishedAtLt;
+                localVarQueryParameter['finished_at__lt'] = (finishedAtLt as any instanceof Date) ?
+                    (finishedAtLt as any).toISOString() :
+                    finishedAtLt;
             }
 
             if (finishedAtLte !== undefined) {
-                localVarQueryParameter['finished_at__lte'] = finishedAtLte;
+                localVarQueryParameter['finished_at__lte'] = (finishedAtLte as any instanceof Date) ?
+                    (finishedAtLte as any).toISOString() :
+                    finishedAtLte;
             }
 
-            if (finishedAtRange !== undefined) {
-                localVarQueryParameter['finished_at__range'] = finishedAtRange;
+            if (finishedAtRange) {
+                localVarQueryParameter['finished_at__range'] = finishedAtRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (limit !== undefined) {
@@ -9073,35 +9089,45 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
             }
 
             if (startedAt !== undefined) {
-                localVarQueryParameter['started_at'] = startedAt;
+                localVarQueryParameter['started_at'] = (startedAt as any instanceof Date) ?
+                    (startedAt as any).toISOString() :
+                    startedAt;
             }
 
             if (startedAtGt !== undefined) {
-                localVarQueryParameter['started_at__gt'] = startedAtGt;
+                localVarQueryParameter['started_at__gt'] = (startedAtGt as any instanceof Date) ?
+                    (startedAtGt as any).toISOString() :
+                    startedAtGt;
             }
 
             if (startedAtGte !== undefined) {
-                localVarQueryParameter['started_at__gte'] = startedAtGte;
+                localVarQueryParameter['started_at__gte'] = (startedAtGte as any instanceof Date) ?
+                    (startedAtGte as any).toISOString() :
+                    startedAtGte;
             }
 
             if (startedAtLt !== undefined) {
-                localVarQueryParameter['started_at__lt'] = startedAtLt;
+                localVarQueryParameter['started_at__lt'] = (startedAtLt as any instanceof Date) ?
+                    (startedAtLt as any).toISOString() :
+                    startedAtLt;
             }
 
             if (startedAtLte !== undefined) {
-                localVarQueryParameter['started_at__lte'] = startedAtLte;
+                localVarQueryParameter['started_at__lte'] = (startedAtLte as any instanceof Date) ?
+                    (startedAtLte as any).toISOString() :
+                    startedAtLte;
             }
 
-            if (startedAtRange !== undefined) {
-                localVarQueryParameter['started_at__range'] = startedAtRange;
+            if (startedAtRange) {
+                localVarQueryParameter['started_at__range'] = startedAtRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (state !== undefined) {
                 localVarQueryParameter['state'] = state;
             }
 
-            if (stateIn !== undefined) {
-                localVarQueryParameter['state__in'] = stateIn;
+            if (stateIn) {
+                localVarQueryParameter['state__in'] = stateIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (taskGroup !== undefined) {
@@ -9112,8 +9138,8 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['worker'] = worker;
             }
 
-            if (workerIn !== undefined) {
-                localVarQueryParameter['worker__in'] = workerIn;
+            if (workerIn) {
+                localVarQueryParameter['worker__in'] = workerIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (fields !== undefined) {
@@ -9294,38 +9320,38 @@ export const TasksApiFp = function(configuration?: Configuration) {
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List tasks
-         * @param {string} [childTasks] child_tasks
-         * @param {string} [createdResources] created_resources
-         * @param {string} [finishedAt] finished_at
-         * @param {string} [finishedAtGt] finished_at__gt
-         * @param {string} [finishedAtGte] finished_at__gte
-         * @param {string} [finishedAtLt] finished_at__lt
-         * @param {string} [finishedAtLte] finished_at__lte
-         * @param {string} [finishedAtRange] finished_at__range
+         * @param {string} [childTasks] Foreign Key referenced by HREF
+         * @param {string} [createdResources] 
+         * @param {string} [finishedAt] ISO 8601 formatted dates are supported
+         * @param {string} [finishedAtGt] Filter results where finished_at is greater than value
+         * @param {string} [finishedAtGte] Filter results where finished_at is greater than or equal to value
+         * @param {string} [finishedAtLt] Filter results where finished_at is less than value
+         * @param {string} [finishedAtLte] Filter results where finished_at is less than or equal to value
+         * @param {Array<string>} [finishedAtRange] Filter results where finished_at is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [parentTask] parent_task
-         * @param {string} [reservedResourcesRecord] reserved_resources_record
-         * @param {string} [startedAt] started_at
-         * @param {string} [startedAtGt] started_at__gt
-         * @param {string} [startedAtGte] started_at__gte
-         * @param {string} [startedAtLt] started_at__lt
-         * @param {string} [startedAtLte] started_at__lte
-         * @param {string} [startedAtRange] started_at__range
-         * @param {string} [state] state
-         * @param {string} [stateIn] state__in
-         * @param {string} [taskGroup] task_group
-         * @param {string} [worker] worker
-         * @param {string} [workerIn] worker__in
+         * @param {string} [parentTask] Foreign Key referenced by HREF
+         * @param {string} [reservedResourcesRecord] 
+         * @param {string} [startedAt] ISO 8601 formatted dates are supported
+         * @param {string} [startedAtGt] Filter results where started_at is greater than value
+         * @param {string} [startedAtGte] Filter results where started_at is greater than or equal to value
+         * @param {string} [startedAtLt] Filter results where started_at is less than value
+         * @param {string} [startedAtLte] Filter results where started_at is less than or equal to value
+         * @param {Array<string>} [startedAtRange] Filter results where started_at is between two comma separated values
+         * @param {'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting'} [state] 
+         * @param {Array<string>} [stateIn] Filter results where state is in a comma-separated list of values
+         * @param {string} [taskGroup] Foreign Key referenced by HREF
+         * @param {string} [worker] Foreign Key referenced by HREF
+         * @param {Array<string>} [workerIn] Filter results where worker is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: string, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: string, state?: string, stateIn?: string, taskGroup?: string, worker?: string, workerIn?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedTaskResponseList>> {
+        async list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: Array<string>, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: Array<string>, state?: 'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting', stateIn?: Array<string>, taskGroup?: string, worker?: string, workerIn?: Array<string>, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedTaskResponseList>> {
             const localVarAxiosArgs = await TasksApiAxiosParamCreator(configuration).list(childTasks, createdResources, finishedAt, finishedAtGt, finishedAtGte, finishedAtLt, finishedAtLte, finishedAtRange, limit, name, nameContains, offset, ordering, parentTask, reservedResourcesRecord, startedAt, startedAtGt, startedAtGte, startedAtLt, startedAtLte, startedAtRange, state, stateIn, taskGroup, worker, workerIn, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -9385,38 +9411,38 @@ export const TasksApiFactory = function (configuration?: Configuration, basePath
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List tasks
-         * @param {string} [childTasks] child_tasks
-         * @param {string} [createdResources] created_resources
-         * @param {string} [finishedAt] finished_at
-         * @param {string} [finishedAtGt] finished_at__gt
-         * @param {string} [finishedAtGte] finished_at__gte
-         * @param {string} [finishedAtLt] finished_at__lt
-         * @param {string} [finishedAtLte] finished_at__lte
-         * @param {string} [finishedAtRange] finished_at__range
+         * @param {string} [childTasks] Foreign Key referenced by HREF
+         * @param {string} [createdResources] 
+         * @param {string} [finishedAt] ISO 8601 formatted dates are supported
+         * @param {string} [finishedAtGt] Filter results where finished_at is greater than value
+         * @param {string} [finishedAtGte] Filter results where finished_at is greater than or equal to value
+         * @param {string} [finishedAtLt] Filter results where finished_at is less than value
+         * @param {string} [finishedAtLte] Filter results where finished_at is less than or equal to value
+         * @param {Array<string>} [finishedAtRange] Filter results where finished_at is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [parentTask] parent_task
-         * @param {string} [reservedResourcesRecord] reserved_resources_record
-         * @param {string} [startedAt] started_at
-         * @param {string} [startedAtGt] started_at__gt
-         * @param {string} [startedAtGte] started_at__gte
-         * @param {string} [startedAtLt] started_at__lt
-         * @param {string} [startedAtLte] started_at__lte
-         * @param {string} [startedAtRange] started_at__range
-         * @param {string} [state] state
-         * @param {string} [stateIn] state__in
-         * @param {string} [taskGroup] task_group
-         * @param {string} [worker] worker
-         * @param {string} [workerIn] worker__in
+         * @param {string} [parentTask] Foreign Key referenced by HREF
+         * @param {string} [reservedResourcesRecord] 
+         * @param {string} [startedAt] ISO 8601 formatted dates are supported
+         * @param {string} [startedAtGt] Filter results where started_at is greater than value
+         * @param {string} [startedAtGte] Filter results where started_at is greater than or equal to value
+         * @param {string} [startedAtLt] Filter results where started_at is less than value
+         * @param {string} [startedAtLte] Filter results where started_at is less than or equal to value
+         * @param {Array<string>} [startedAtRange] Filter results where started_at is between two comma separated values
+         * @param {'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting'} [state] 
+         * @param {Array<string>} [stateIn] Filter results where state is in a comma-separated list of values
+         * @param {string} [taskGroup] Foreign Key referenced by HREF
+         * @param {string} [worker] Foreign Key referenced by HREF
+         * @param {Array<string>} [workerIn] Filter results where worker is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: string, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: string, state?: string, stateIn?: string, taskGroup?: string, worker?: string, workerIn?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedTaskResponseList> {
+        list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: Array<string>, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: Array<string>, state?: 'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting', stateIn?: Array<string>, taskGroup?: string, worker?: string, workerIn?: Array<string>, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedTaskResponseList> {
             return TasksApiFp(configuration).list(childTasks, createdResources, finishedAt, finishedAtGt, finishedAtGte, finishedAtLt, finishedAtLte, finishedAtRange, limit, name, nameContains, offset, ordering, parentTask, reservedResourcesRecord, startedAt, startedAtGt, startedAtGte, startedAtLt, startedAtLte, startedAtRange, state, stateIn, taskGroup, worker, workerIn, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9467,39 +9493,39 @@ export class TasksApi extends BaseAPI {
     /**
      * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
      * @summary List tasks
-     * @param {string} [childTasks] child_tasks
-     * @param {string} [createdResources] created_resources
-     * @param {string} [finishedAt] finished_at
-     * @param {string} [finishedAtGt] finished_at__gt
-     * @param {string} [finishedAtGte] finished_at__gte
-     * @param {string} [finishedAtLt] finished_at__lt
-     * @param {string} [finishedAtLte] finished_at__lte
-     * @param {string} [finishedAtRange] finished_at__range
+     * @param {string} [childTasks] Foreign Key referenced by HREF
+     * @param {string} [createdResources] 
+     * @param {string} [finishedAt] ISO 8601 formatted dates are supported
+     * @param {string} [finishedAtGt] Filter results where finished_at is greater than value
+     * @param {string} [finishedAtGte] Filter results where finished_at is greater than or equal to value
+     * @param {string} [finishedAtLt] Filter results where finished_at is less than value
+     * @param {string} [finishedAtLte] Filter results where finished_at is less than or equal to value
+     * @param {Array<string>} [finishedAtRange] Filter results where finished_at is between two comma separated values
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [parentTask] parent_task
-     * @param {string} [reservedResourcesRecord] reserved_resources_record
-     * @param {string} [startedAt] started_at
-     * @param {string} [startedAtGt] started_at__gt
-     * @param {string} [startedAtGte] started_at__gte
-     * @param {string} [startedAtLt] started_at__lt
-     * @param {string} [startedAtLte] started_at__lte
-     * @param {string} [startedAtRange] started_at__range
-     * @param {string} [state] state
-     * @param {string} [stateIn] state__in
-     * @param {string} [taskGroup] task_group
-     * @param {string} [worker] worker
-     * @param {string} [workerIn] worker__in
+     * @param {string} [parentTask] Foreign Key referenced by HREF
+     * @param {string} [reservedResourcesRecord] 
+     * @param {string} [startedAt] ISO 8601 formatted dates are supported
+     * @param {string} [startedAtGt] Filter results where started_at is greater than value
+     * @param {string} [startedAtGte] Filter results where started_at is greater than or equal to value
+     * @param {string} [startedAtLt] Filter results where started_at is less than value
+     * @param {string} [startedAtLte] Filter results where started_at is less than or equal to value
+     * @param {Array<string>} [startedAtRange] Filter results where started_at is between two comma separated values
+     * @param {'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting'} [state] 
+     * @param {Array<string>} [stateIn] Filter results where state is in a comma-separated list of values
+     * @param {string} [taskGroup] Foreign Key referenced by HREF
+     * @param {string} [worker] Foreign Key referenced by HREF
+     * @param {Array<string>} [workerIn] Filter results where worker is in a comma-separated list of values
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TasksApi
      */
-    public list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: string, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: string, state?: string, stateIn?: string, taskGroup?: string, worker?: string, workerIn?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(childTasks?: string, createdResources?: string, finishedAt?: string, finishedAtGt?: string, finishedAtGte?: string, finishedAtLt?: string, finishedAtLte?: string, finishedAtRange?: Array<string>, limit?: number, name?: string, nameContains?: string, offset?: number, ordering?: string, parentTask?: string, reservedResourcesRecord?: string, startedAt?: string, startedAtGt?: string, startedAtGte?: string, startedAtLt?: string, startedAtLte?: string, startedAtRange?: Array<string>, state?: 'canceled' | 'completed' | 'failed' | 'running' | 'skipped' | 'waiting', stateIn?: Array<string>, taskGroup?: string, worker?: string, workerIn?: Array<string>, fields?: string, excludeFields?: string, options?: any) {
         return TasksApiFp(this.configuration).list(childTasks, createdResources, finishedAt, finishedAtGt, finishedAtGte, finishedAtLt, finishedAtLte, finishedAtRange, limit, name, nameContains, offset, ordering, parentTask, reservedResourcesRecord, startedAt, startedAtGt, startedAtGte, startedAtLt, startedAtLte, startedAtRange, state, stateIn, taskGroup, worker, workerIn, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -10207,37 +10233,37 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * ViewSet for User.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List users
-         * @param {string} [email] email
-         * @param {string} [emailContains] email__contains
-         * @param {string} [emailIcontains] email__icontains
-         * @param {string} [emailIexact] email__iexact
-         * @param {string} [emailIn] email__in
-         * @param {string} [firstName] first_name
-         * @param {string} [firstNameContains] first_name__contains
-         * @param {string} [firstNameIcontains] first_name__icontains
-         * @param {string} [firstNameIexact] first_name__iexact
-         * @param {string} [firstNameIn] first_name__in
-         * @param {string} [isActive] is_active
-         * @param {string} [isStaff] is_staff
-         * @param {string} [lastName] last_name
-         * @param {string} [lastNameContains] last_name__contains
-         * @param {string} [lastNameIcontains] last_name__icontains
-         * @param {string} [lastNameIexact] last_name__iexact
-         * @param {string} [lastNameIn] last_name__in
+         * @param {string} [email] Filter results where email matches value
+         * @param {string} [emailContains] Filter results where email contains value
+         * @param {string} [emailIcontains] Filter results where email contains value
+         * @param {string} [emailIexact] Filter results where email matches value
+         * @param {Array<string>} [emailIn] Filter results where email is in a comma-separated list of values
+         * @param {string} [firstName] Filter results where first_name matches value
+         * @param {string} [firstNameContains] Filter results where first_name contains value
+         * @param {string} [firstNameIcontains] Filter results where first_name contains value
+         * @param {string} [firstNameIexact] Filter results where first_name matches value
+         * @param {Array<string>} [firstNameIn] Filter results where first_name is in a comma-separated list of values
+         * @param {boolean} [isActive] Filter results where is_active matches value
+         * @param {boolean} [isStaff] Filter results where is_staff matches value
+         * @param {string} [lastName] Filter results where last_name matches value
+         * @param {string} [lastNameContains] Filter results where last_name contains value
+         * @param {string} [lastNameIcontains] Filter results where last_name contains value
+         * @param {string} [lastNameIexact] Filter results where last_name matches value
+         * @param {Array<string>} [lastNameIn] Filter results where last_name is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [username] username
-         * @param {string} [usernameContains] username__contains
-         * @param {string} [usernameIcontains] username__icontains
-         * @param {string} [usernameIexact] username__iexact
-         * @param {string} [usernameIn] username__in
+         * @param {string} [username] Filter results where username matches value
+         * @param {string} [usernameContains] Filter results where username contains value
+         * @param {string} [usernameIcontains] Filter results where username contains value
+         * @param {string} [usernameIexact] Filter results where username matches value
+         * @param {Array<string>} [usernameIn] Filter results where username is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: string, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: string, isActive?: string, isStaff?: string, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: string, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: Array<string>, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: Array<string>, isActive?: boolean, isStaff?: boolean, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: Array<string>, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: Array<string>, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/users/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -10274,8 +10300,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['email__iexact'] = emailIexact;
             }
 
-            if (emailIn !== undefined) {
-                localVarQueryParameter['email__in'] = emailIn;
+            if (emailIn) {
+                localVarQueryParameter['email__in'] = emailIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (firstName !== undefined) {
@@ -10294,8 +10320,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['first_name__iexact'] = firstNameIexact;
             }
 
-            if (firstNameIn !== undefined) {
-                localVarQueryParameter['first_name__in'] = firstNameIn;
+            if (firstNameIn) {
+                localVarQueryParameter['first_name__in'] = firstNameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (isActive !== undefined) {
@@ -10322,8 +10348,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['last_name__iexact'] = lastNameIexact;
             }
 
-            if (lastNameIn !== undefined) {
-                localVarQueryParameter['last_name__in'] = lastNameIn;
+            if (lastNameIn) {
+                localVarQueryParameter['last_name__in'] = lastNameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (limit !== undefined) {
@@ -10354,8 +10380,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['username__iexact'] = usernameIexact;
             }
 
-            if (usernameIn !== undefined) {
-                localVarQueryParameter['username__in'] = usernameIn;
+            if (usernameIn) {
+                localVarQueryParameter['username__in'] = usernameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (fields !== undefined) {
@@ -10517,37 +10543,37 @@ export const UsersApiFp = function(configuration?: Configuration) {
         /**
          * ViewSet for User.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List users
-         * @param {string} [email] email
-         * @param {string} [emailContains] email__contains
-         * @param {string} [emailIcontains] email__icontains
-         * @param {string} [emailIexact] email__iexact
-         * @param {string} [emailIn] email__in
-         * @param {string} [firstName] first_name
-         * @param {string} [firstNameContains] first_name__contains
-         * @param {string} [firstNameIcontains] first_name__icontains
-         * @param {string} [firstNameIexact] first_name__iexact
-         * @param {string} [firstNameIn] first_name__in
-         * @param {string} [isActive] is_active
-         * @param {string} [isStaff] is_staff
-         * @param {string} [lastName] last_name
-         * @param {string} [lastNameContains] last_name__contains
-         * @param {string} [lastNameIcontains] last_name__icontains
-         * @param {string} [lastNameIexact] last_name__iexact
-         * @param {string} [lastNameIn] last_name__in
+         * @param {string} [email] Filter results where email matches value
+         * @param {string} [emailContains] Filter results where email contains value
+         * @param {string} [emailIcontains] Filter results where email contains value
+         * @param {string} [emailIexact] Filter results where email matches value
+         * @param {Array<string>} [emailIn] Filter results where email is in a comma-separated list of values
+         * @param {string} [firstName] Filter results where first_name matches value
+         * @param {string} [firstNameContains] Filter results where first_name contains value
+         * @param {string} [firstNameIcontains] Filter results where first_name contains value
+         * @param {string} [firstNameIexact] Filter results where first_name matches value
+         * @param {Array<string>} [firstNameIn] Filter results where first_name is in a comma-separated list of values
+         * @param {boolean} [isActive] Filter results where is_active matches value
+         * @param {boolean} [isStaff] Filter results where is_staff matches value
+         * @param {string} [lastName] Filter results where last_name matches value
+         * @param {string} [lastNameContains] Filter results where last_name contains value
+         * @param {string} [lastNameIcontains] Filter results where last_name contains value
+         * @param {string} [lastNameIexact] Filter results where last_name matches value
+         * @param {Array<string>} [lastNameIn] Filter results where last_name is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [username] username
-         * @param {string} [usernameContains] username__contains
-         * @param {string} [usernameIcontains] username__icontains
-         * @param {string} [usernameIexact] username__iexact
-         * @param {string} [usernameIn] username__in
+         * @param {string} [username] Filter results where username matches value
+         * @param {string} [usernameContains] Filter results where username contains value
+         * @param {string} [usernameIcontains] Filter results where username contains value
+         * @param {string} [usernameIexact] Filter results where username matches value
+         * @param {Array<string>} [usernameIn] Filter results where username is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: string, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: string, isActive?: string, isStaff?: string, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: string, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedUserResponseList>> {
+        async list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: Array<string>, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: Array<string>, isActive?: boolean, isStaff?: boolean, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: Array<string>, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: Array<string>, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedUserResponseList>> {
             const localVarAxiosArgs = await UsersApiAxiosParamCreator(configuration).list(email, emailContains, emailIcontains, emailIexact, emailIn, firstName, firstNameContains, firstNameIcontains, firstNameIexact, firstNameIn, isActive, isStaff, lastName, lastNameContains, lastNameIcontains, lastNameIexact, lastNameIn, limit, offset, ordering, username, usernameContains, usernameIcontains, usernameIexact, usernameIn, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -10597,37 +10623,37 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         /**
          * ViewSet for User.  NOTE: This API endpoint is in \"tech preview\" and subject to change
          * @summary List users
-         * @param {string} [email] email
-         * @param {string} [emailContains] email__contains
-         * @param {string} [emailIcontains] email__icontains
-         * @param {string} [emailIexact] email__iexact
-         * @param {string} [emailIn] email__in
-         * @param {string} [firstName] first_name
-         * @param {string} [firstNameContains] first_name__contains
-         * @param {string} [firstNameIcontains] first_name__icontains
-         * @param {string} [firstNameIexact] first_name__iexact
-         * @param {string} [firstNameIn] first_name__in
-         * @param {string} [isActive] is_active
-         * @param {string} [isStaff] is_staff
-         * @param {string} [lastName] last_name
-         * @param {string} [lastNameContains] last_name__contains
-         * @param {string} [lastNameIcontains] last_name__icontains
-         * @param {string} [lastNameIexact] last_name__iexact
-         * @param {string} [lastNameIn] last_name__in
+         * @param {string} [email] Filter results where email matches value
+         * @param {string} [emailContains] Filter results where email contains value
+         * @param {string} [emailIcontains] Filter results where email contains value
+         * @param {string} [emailIexact] Filter results where email matches value
+         * @param {Array<string>} [emailIn] Filter results where email is in a comma-separated list of values
+         * @param {string} [firstName] Filter results where first_name matches value
+         * @param {string} [firstNameContains] Filter results where first_name contains value
+         * @param {string} [firstNameIcontains] Filter results where first_name contains value
+         * @param {string} [firstNameIexact] Filter results where first_name matches value
+         * @param {Array<string>} [firstNameIn] Filter results where first_name is in a comma-separated list of values
+         * @param {boolean} [isActive] Filter results where is_active matches value
+         * @param {boolean} [isStaff] Filter results where is_staff matches value
+         * @param {string} [lastName] Filter results where last_name matches value
+         * @param {string} [lastNameContains] Filter results where last_name contains value
+         * @param {string} [lastNameIcontains] Filter results where last_name contains value
+         * @param {string} [lastNameIexact] Filter results where last_name matches value
+         * @param {Array<string>} [lastNameIn] Filter results where last_name is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [username] username
-         * @param {string} [usernameContains] username__contains
-         * @param {string} [usernameIcontains] username__icontains
-         * @param {string} [usernameIexact] username__iexact
-         * @param {string} [usernameIn] username__in
+         * @param {string} [username] Filter results where username matches value
+         * @param {string} [usernameContains] Filter results where username contains value
+         * @param {string} [usernameIcontains] Filter results where username contains value
+         * @param {string} [usernameIexact] Filter results where username matches value
+         * @param {Array<string>} [usernameIn] Filter results where username is in a comma-separated list of values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: string, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: string, isActive?: string, isStaff?: string, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: string, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedUserResponseList> {
+        list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: Array<string>, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: Array<string>, isActive?: boolean, isStaff?: boolean, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: Array<string>, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: Array<string>, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedUserResponseList> {
             return UsersApiFp(configuration).list(email, emailContains, emailIcontains, emailIexact, emailIn, firstName, firstNameContains, firstNameIcontains, firstNameIexact, firstNameIn, isActive, isStaff, lastName, lastNameContains, lastNameIcontains, lastNameIexact, lastNameIn, limit, offset, ordering, username, usernameContains, usernameIcontains, usernameIexact, usernameIn, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -10666,38 +10692,38 @@ export class UsersApi extends BaseAPI {
     /**
      * ViewSet for User.  NOTE: This API endpoint is in \"tech preview\" and subject to change
      * @summary List users
-     * @param {string} [email] email
-     * @param {string} [emailContains] email__contains
-     * @param {string} [emailIcontains] email__icontains
-     * @param {string} [emailIexact] email__iexact
-     * @param {string} [emailIn] email__in
-     * @param {string} [firstName] first_name
-     * @param {string} [firstNameContains] first_name__contains
-     * @param {string} [firstNameIcontains] first_name__icontains
-     * @param {string} [firstNameIexact] first_name__iexact
-     * @param {string} [firstNameIn] first_name__in
-     * @param {string} [isActive] is_active
-     * @param {string} [isStaff] is_staff
-     * @param {string} [lastName] last_name
-     * @param {string} [lastNameContains] last_name__contains
-     * @param {string} [lastNameIcontains] last_name__icontains
-     * @param {string} [lastNameIexact] last_name__iexact
-     * @param {string} [lastNameIn] last_name__in
+     * @param {string} [email] Filter results where email matches value
+     * @param {string} [emailContains] Filter results where email contains value
+     * @param {string} [emailIcontains] Filter results where email contains value
+     * @param {string} [emailIexact] Filter results where email matches value
+     * @param {Array<string>} [emailIn] Filter results where email is in a comma-separated list of values
+     * @param {string} [firstName] Filter results where first_name matches value
+     * @param {string} [firstNameContains] Filter results where first_name contains value
+     * @param {string} [firstNameIcontains] Filter results where first_name contains value
+     * @param {string} [firstNameIexact] Filter results where first_name matches value
+     * @param {Array<string>} [firstNameIn] Filter results where first_name is in a comma-separated list of values
+     * @param {boolean} [isActive] Filter results where is_active matches value
+     * @param {boolean} [isStaff] Filter results where is_staff matches value
+     * @param {string} [lastName] Filter results where last_name matches value
+     * @param {string} [lastNameContains] Filter results where last_name contains value
+     * @param {string} [lastNameIcontains] Filter results where last_name contains value
+     * @param {string} [lastNameIexact] Filter results where last_name matches value
+     * @param {Array<string>} [lastNameIn] Filter results where last_name is in a comma-separated list of values
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [username] username
-     * @param {string} [usernameContains] username__contains
-     * @param {string} [usernameIcontains] username__icontains
-     * @param {string} [usernameIexact] username__iexact
-     * @param {string} [usernameIn] username__in
+     * @param {string} [username] Filter results where username matches value
+     * @param {string} [usernameContains] Filter results where username contains value
+     * @param {string} [usernameIcontains] Filter results where username contains value
+     * @param {string} [usernameIexact] Filter results where username matches value
+     * @param {Array<string>} [usernameIn] Filter results where username is in a comma-separated list of values
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: string, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: string, isActive?: string, isStaff?: string, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: string, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(email?: string, emailContains?: string, emailIcontains?: string, emailIexact?: string, emailIn?: Array<string>, firstName?: string, firstNameContains?: string, firstNameIcontains?: string, firstNameIexact?: string, firstNameIn?: Array<string>, isActive?: boolean, isStaff?: boolean, lastName?: string, lastNameContains?: string, lastNameIcontains?: string, lastNameIexact?: string, lastNameIn?: Array<string>, limit?: number, offset?: number, ordering?: string, username?: string, usernameContains?: string, usernameIcontains?: string, usernameIexact?: string, usernameIn?: Array<string>, fields?: string, excludeFields?: string, options?: any) {
         return UsersApiFp(this.configuration).list(email, emailContains, emailIcontains, emailIexact, emailIn, firstName, firstNameContains, firstNameIcontains, firstNameIexact, firstNameIn, isActive, isStaff, lastName, lastNameContains, lastNameIcontains, lastNameIexact, lastNameIn, limit, offset, ordering, username, usernameContains, usernameIcontains, usernameIexact, usernameIn, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -10739,28 +10765,28 @@ export const WorkersApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List workers
-         * @param {string} [lastHeartbeat] last_heartbeat
-         * @param {string} [lastHeartbeatGt] last_heartbeat__gt
-         * @param {string} [lastHeartbeatGte] last_heartbeat__gte
-         * @param {string} [lastHeartbeatLt] last_heartbeat__lt
-         * @param {string} [lastHeartbeatLte] last_heartbeat__lte
-         * @param {string} [lastHeartbeatRange] last_heartbeat__range
+         * @param {string} [lastHeartbeat] ISO 8601 formatted dates are supported
+         * @param {string} [lastHeartbeatGt] Filter results where last_heartbeat is greater than value
+         * @param {string} [lastHeartbeatGte] Filter results where last_heartbeat is greater than or equal to value
+         * @param {string} [lastHeartbeatLt] Filter results where last_heartbeat is less than value
+         * @param {string} [lastHeartbeatLte] Filter results where last_heartbeat is less than or equal to value
+         * @param {Array<string>} [lastHeartbeatRange] Filter results where last_heartbeat is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [missing] missing
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {boolean} [missing] 
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
-         * @param {string} [online] online
+         * @param {boolean} [online] 
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: string, limit?: number, missing?: string, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, online?: string, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: Array<string>, limit?: number, missing?: boolean, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, online?: boolean, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/workers/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -10782,27 +10808,37 @@ export const WorkersApiAxiosParamCreator = function (configuration?: Configurati
             // authentication cookieAuth required
 
             if (lastHeartbeat !== undefined) {
-                localVarQueryParameter['last_heartbeat'] = lastHeartbeat;
+                localVarQueryParameter['last_heartbeat'] = (lastHeartbeat as any instanceof Date) ?
+                    (lastHeartbeat as any).toISOString() :
+                    lastHeartbeat;
             }
 
             if (lastHeartbeatGt !== undefined) {
-                localVarQueryParameter['last_heartbeat__gt'] = lastHeartbeatGt;
+                localVarQueryParameter['last_heartbeat__gt'] = (lastHeartbeatGt as any instanceof Date) ?
+                    (lastHeartbeatGt as any).toISOString() :
+                    lastHeartbeatGt;
             }
 
             if (lastHeartbeatGte !== undefined) {
-                localVarQueryParameter['last_heartbeat__gte'] = lastHeartbeatGte;
+                localVarQueryParameter['last_heartbeat__gte'] = (lastHeartbeatGte as any instanceof Date) ?
+                    (lastHeartbeatGte as any).toISOString() :
+                    lastHeartbeatGte;
             }
 
             if (lastHeartbeatLt !== undefined) {
-                localVarQueryParameter['last_heartbeat__lt'] = lastHeartbeatLt;
+                localVarQueryParameter['last_heartbeat__lt'] = (lastHeartbeatLt as any instanceof Date) ?
+                    (lastHeartbeatLt as any).toISOString() :
+                    lastHeartbeatLt;
             }
 
             if (lastHeartbeatLte !== undefined) {
-                localVarQueryParameter['last_heartbeat__lte'] = lastHeartbeatLte;
+                localVarQueryParameter['last_heartbeat__lte'] = (lastHeartbeatLte as any instanceof Date) ?
+                    (lastHeartbeatLte as any).toISOString() :
+                    lastHeartbeatLte;
             }
 
-            if (lastHeartbeatRange !== undefined) {
-                localVarQueryParameter['last_heartbeat__range'] = lastHeartbeatRange;
+            if (lastHeartbeatRange) {
+                localVarQueryParameter['last_heartbeat__range'] = lastHeartbeatRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (limit !== undefined) {
@@ -10825,8 +10861,8 @@ export const WorkersApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -10944,28 +10980,28 @@ export const WorkersApiFp = function(configuration?: Configuration) {
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List workers
-         * @param {string} [lastHeartbeat] last_heartbeat
-         * @param {string} [lastHeartbeatGt] last_heartbeat__gt
-         * @param {string} [lastHeartbeatGte] last_heartbeat__gte
-         * @param {string} [lastHeartbeatLt] last_heartbeat__lt
-         * @param {string} [lastHeartbeatLte] last_heartbeat__lte
-         * @param {string} [lastHeartbeatRange] last_heartbeat__range
+         * @param {string} [lastHeartbeat] ISO 8601 formatted dates are supported
+         * @param {string} [lastHeartbeatGt] Filter results where last_heartbeat is greater than value
+         * @param {string} [lastHeartbeatGte] Filter results where last_heartbeat is greater than or equal to value
+         * @param {string} [lastHeartbeatLt] Filter results where last_heartbeat is less than value
+         * @param {string} [lastHeartbeatLte] Filter results where last_heartbeat is less than or equal to value
+         * @param {Array<string>} [lastHeartbeatRange] Filter results where last_heartbeat is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [missing] missing
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {boolean} [missing] 
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
-         * @param {string} [online] online
+         * @param {boolean} [online] 
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: string, limit?: number, missing?: string, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, online?: string, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedWorkerResponseList>> {
+        async list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: Array<string>, limit?: number, missing?: boolean, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, online?: boolean, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedWorkerResponseList>> {
             const localVarAxiosArgs = await WorkersApiAxiosParamCreator(configuration).list(lastHeartbeat, lastHeartbeatGt, lastHeartbeatGte, lastHeartbeatLt, lastHeartbeatLte, lastHeartbeatRange, limit, missing, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, online, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -11000,28 +11036,28 @@ export const WorkersApiFactory = function (configuration?: Configuration, basePa
         /**
          * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
          * @summary List workers
-         * @param {string} [lastHeartbeat] last_heartbeat
-         * @param {string} [lastHeartbeatGt] last_heartbeat__gt
-         * @param {string} [lastHeartbeatGte] last_heartbeat__gte
-         * @param {string} [lastHeartbeatLt] last_heartbeat__lt
-         * @param {string} [lastHeartbeatLte] last_heartbeat__lte
-         * @param {string} [lastHeartbeatRange] last_heartbeat__range
+         * @param {string} [lastHeartbeat] ISO 8601 formatted dates are supported
+         * @param {string} [lastHeartbeatGt] Filter results where last_heartbeat is greater than value
+         * @param {string} [lastHeartbeatGte] Filter results where last_heartbeat is greater than or equal to value
+         * @param {string} [lastHeartbeatLt] Filter results where last_heartbeat is less than value
+         * @param {string} [lastHeartbeatLte] Filter results where last_heartbeat is less than or equal to value
+         * @param {Array<string>} [lastHeartbeatRange] Filter results where last_heartbeat is between two comma separated values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [missing] missing
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {boolean} [missing] 
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
-         * @param {string} [online] online
+         * @param {boolean} [online] 
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: string, limit?: number, missing?: string, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, online?: string, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedWorkerResponseList> {
+        list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: Array<string>, limit?: number, missing?: boolean, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, online?: boolean, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedWorkerResponseList> {
             return WorkersApiFp(configuration).list(lastHeartbeat, lastHeartbeatGt, lastHeartbeatGte, lastHeartbeatLt, lastHeartbeatLte, lastHeartbeatRange, limit, missing, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, online, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -11049,21 +11085,21 @@ export class WorkersApi extends BaseAPI {
     /**
      * A customized named ModelViewSet that knows how to register itself with the Pulp API router.  This viewset is discoverable by its name. \"Normal\" Django Models and Master/Detail models are supported by the ``register_with`` method.  Attributes:     lookup_field (str): The name of the field by which an object should be looked up, in         addition to any parent lookups if this ViewSet is nested. Defaults to \'pk\'     endpoint_name (str): The name of the final path segment that should identify the ViewSet\'s         collection endpoint.     nest_prefix (str): Optional prefix under which this ViewSet should be nested. This must         correspond to the \"parent_prefix\" of a router with rest_framework_nested.NestedMixin.         None indicates this ViewSet should not be nested.     parent_lookup_kwargs (dict): Optional mapping of key names that would appear in self.kwargs         to django model filter expressions that can be used with the corresponding value from         self.kwargs, used only by a nested ViewSet to filter based on the parent object\'s         identity.     schema (DefaultSchema): The schema class to use by default in a viewset.
      * @summary List workers
-     * @param {string} [lastHeartbeat] last_heartbeat
-     * @param {string} [lastHeartbeatGt] last_heartbeat__gt
-     * @param {string} [lastHeartbeatGte] last_heartbeat__gte
-     * @param {string} [lastHeartbeatLt] last_heartbeat__lt
-     * @param {string} [lastHeartbeatLte] last_heartbeat__lte
-     * @param {string} [lastHeartbeatRange] last_heartbeat__range
+     * @param {string} [lastHeartbeat] ISO 8601 formatted dates are supported
+     * @param {string} [lastHeartbeatGt] Filter results where last_heartbeat is greater than value
+     * @param {string} [lastHeartbeatGte] Filter results where last_heartbeat is greater than or equal to value
+     * @param {string} [lastHeartbeatLt] Filter results where last_heartbeat is less than value
+     * @param {string} [lastHeartbeatLte] Filter results where last_heartbeat is less than or equal to value
+     * @param {Array<string>} [lastHeartbeatRange] Filter results where last_heartbeat is between two comma separated values
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [missing] missing
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {boolean} [missing] 
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
-     * @param {string} [online] online
+     * @param {boolean} [online] 
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
@@ -11071,7 +11107,7 @@ export class WorkersApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof WorkersApi
      */
-    public list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: string, limit?: number, missing?: string, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, online?: string, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(lastHeartbeat?: string, lastHeartbeatGt?: string, lastHeartbeatGte?: string, lastHeartbeatLt?: string, lastHeartbeatLte?: string, lastHeartbeatRange?: Array<string>, limit?: number, missing?: boolean, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, online?: boolean, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
         return WorkersApiFp(this.configuration).list(lastHeartbeat, lastHeartbeatGt, lastHeartbeatGte, lastHeartbeatLt, lastHeartbeatLte, lastHeartbeatRange, limit, missing, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, online, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 

@@ -40,22 +40,22 @@ export interface AsyncOperationResponse {
 export interface ContentSummary {
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummary
      */
-    added: object;
+    added: { [key: string]: object; };
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummary
      */
-    removed: object;
+    removed: { [key: string]: object; };
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummary
      */
-    present: object;
+    present: { [key: string]: object; };
 }
 /**
  * Serializer for the RepositoryVersion content summary
@@ -65,22 +65,22 @@ export interface ContentSummary {
 export interface ContentSummaryResponse {
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummaryResponse
      */
-    added: object;
+    added: { [key: string]: object; };
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummaryResponse
      */
-    removed: object;
+    removed: { [key: string]: object; };
     /**
      * 
-     * @type {object}
+     * @type {{ [key: string]: object; }}
      * @memberof ContentSummaryResponse
      */
-    present: object;
+    present: { [key: string]: object; };
 }
 /**
  * Base serializer for Exports.
@@ -217,6 +217,12 @@ export interface FileFileDistribution {
      */
     name: string;
     /**
+     * The latest RepositoryVersion for this Repository will be served.
+     * @type {string}
+     * @memberof FileFileDistribution
+     */
+    repository?: string | null;
+    /**
      * Publication to be served
      * @type {string}
      * @memberof FileFileDistribution
@@ -271,6 +277,12 @@ export interface FileFileDistributionResponse {
      * @memberof FileFileDistributionResponse
      */
     name: string;
+    /**
+     * The latest RepositoryVersion for this Repository will be served.
+     * @type {string}
+     * @memberof FileFileDistributionResponse
+     */
+    repository?: string | null;
     /**
      * Publication to be served
      * @type {string}
@@ -439,11 +451,23 @@ export interface FileFileRemote {
      */
     tls_validation?: boolean;
     /**
-     * The proxy URL. Format: scheme://user:password@host:port
+     * The proxy URL. Format: scheme://host:port
      * @type {string}
      * @memberof FileFileRemote
      */
     proxy_url?: string | null;
+    /**
+     * The username to authenticte to the proxy.
+     * @type {string}
+     * @memberof FileFileRemote
+     */
+    proxy_username?: string | null;
+    /**
+     * The password to authenticte to the proxy.
+     * @type {string}
+     * @memberof FileFileRemote
+     */
+    proxy_password?: string | null;
     /**
      * The username to be used for authentication when syncing.
      * @type {string}
@@ -498,6 +522,12 @@ export interface FileFileRemote {
      * @memberof FileFileRemote
      */
     sock_read_timeout?: number | null;
+    /**
+     * Headers for aiohttp.Clientsession
+     * @type {Array<object>}
+     * @memberof FileFileRemote
+     */
+    headers?: Array<object>;
     /**
      * Limits total download rate in requests per second
      * @type {number}
@@ -548,35 +578,17 @@ export interface FileFileRemoteResponse {
      */
     client_cert?: string | null;
     /**
-     * A PEM encoded private key used for authentication.
-     * @type {string}
-     * @memberof FileFileRemoteResponse
-     */
-    client_key?: string | null;
-    /**
      * If True, TLS peer validation must be performed.
      * @type {boolean}
      * @memberof FileFileRemoteResponse
      */
     tls_validation?: boolean;
     /**
-     * The proxy URL. Format: scheme://user:password@host:port
+     * The proxy URL. Format: scheme://host:port
      * @type {string}
      * @memberof FileFileRemoteResponse
      */
     proxy_url?: string | null;
-    /**
-     * The username to be used for authentication when syncing.
-     * @type {string}
-     * @memberof FileFileRemoteResponse
-     */
-    username?: string | null;
-    /**
-     * The password to be used for authentication when syncing.
-     * @type {string}
-     * @memberof FileFileRemoteResponse
-     */
-    password?: string | null;
     /**
      * 
      * @type {object}
@@ -626,6 +638,12 @@ export interface FileFileRemoteResponse {
      */
     sock_read_timeout?: number | null;
     /**
+     * Headers for aiohttp.Clientsession
+     * @type {Array<object>}
+     * @memberof FileFileRemoteResponse
+     */
+    headers?: Array<object>;
+    /**
      * Limits total download rate in requests per second
      * @type {number}
      * @memberof FileFileRemoteResponse
@@ -657,11 +675,29 @@ export interface FileFileRepository {
      */
     description?: string | null;
     /**
+     * Retain X versions of the repository. Default is null which retains all versions. This is provided as a tech preview in Pulp 3 and may change in the future.
+     * @type {number}
+     * @memberof FileFileRepository
+     */
+    retained_versions?: number | null;
+    /**
      * 
      * @type {string}
      * @memberof FileFileRepository
      */
     remote?: string | null;
+    /**
+     * Whether to automatically create publications for new repository versions, and update any distributions pointing to this repository.
+     * @type {boolean}
+     * @memberof FileFileRepository
+     */
+    autopublish?: boolean;
+    /**
+     * Filename to use for manifest file containing metadata for all the files.
+     * @type {string}
+     * @memberof FileFileRepository
+     */
+    manifest?: string;
 }
 /**
  * Serializer for File Repositories.
@@ -712,11 +748,29 @@ export interface FileFileRepositoryResponse {
      */
     description?: string | null;
     /**
+     * Retain X versions of the repository. Default is null which retains all versions. This is provided as a tech preview in Pulp 3 and may change in the future.
+     * @type {number}
+     * @memberof FileFileRepositoryResponse
+     */
+    retained_versions?: number | null;
+    /**
      * 
      * @type {string}
      * @memberof FileFileRepositoryResponse
      */
     remote?: string | null;
+    /**
+     * Whether to automatically create publications for new repository versions, and update any distributions pointing to this repository.
+     * @type {boolean}
+     * @memberof FileFileRepositoryResponse
+     */
+    autopublish?: boolean;
+    /**
+     * Filename to use for manifest file containing metadata for all the files.
+     * @type {string}
+     * @memberof FileFileRepositoryResponse
+     */
+    manifest?: string;
 }
 /**
  * 
@@ -997,6 +1051,12 @@ export interface PatchedfileFileDistribution {
      */
     name?: string;
     /**
+     * The latest RepositoryVersion for this Repository will be served.
+     * @type {string}
+     * @memberof PatchedfileFileDistribution
+     */
+    repository?: string | null;
+    /**
      * Publication to be served
      * @type {string}
      * @memberof PatchedfileFileDistribution
@@ -1065,11 +1125,23 @@ export interface PatchedfileFileRemote {
      */
     tls_validation?: boolean;
     /**
-     * The proxy URL. Format: scheme://user:password@host:port
+     * The proxy URL. Format: scheme://host:port
      * @type {string}
      * @memberof PatchedfileFileRemote
      */
     proxy_url?: string | null;
+    /**
+     * The username to authenticte to the proxy.
+     * @type {string}
+     * @memberof PatchedfileFileRemote
+     */
+    proxy_username?: string | null;
+    /**
+     * The password to authenticte to the proxy.
+     * @type {string}
+     * @memberof PatchedfileFileRemote
+     */
+    proxy_password?: string | null;
     /**
      * The username to be used for authentication when syncing.
      * @type {string}
@@ -1125,6 +1197,12 @@ export interface PatchedfileFileRemote {
      */
     sock_read_timeout?: number | null;
     /**
+     * Headers for aiohttp.Clientsession
+     * @type {Array<object>}
+     * @memberof PatchedfileFileRemote
+     */
+    headers?: Array<object>;
+    /**
      * Limits total download rate in requests per second
      * @type {number}
      * @memberof PatchedfileFileRemote
@@ -1156,11 +1234,29 @@ export interface PatchedfileFileRepository {
      */
     description?: string | null;
     /**
+     * Retain X versions of the repository. Default is null which retains all versions. This is provided as a tech preview in Pulp 3 and may change in the future.
+     * @type {number}
+     * @memberof PatchedfileFileRepository
+     */
+    retained_versions?: number | null;
+    /**
      * 
      * @type {string}
      * @memberof PatchedfileFileRepository
      */
     remote?: string | null;
+    /**
+     * Whether to automatically create publications for new repository versions, and update any distributions pointing to this repository.
+     * @type {boolean}
+     * @memberof PatchedfileFileRepository
+     */
+    autopublish?: boolean;
+    /**
+     * Filename to use for manifest file containing metadata for all the files.
+     * @type {string}
+     * @memberof PatchedfileFileRepository
+     */
+    manifest?: string;
 }
 /**
  * 
@@ -1366,11 +1462,11 @@ export const ContentFilesApiAxiosParamCreator = function (configuration?: Config
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [relativePath] relative_path
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
-         * @param {string} [sha256] sha256
+         * @param {string} [relativePath] Filter results where relative_path matches value
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
+         * @param {string} [sha256] 
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -1548,11 +1644,11 @@ export const ContentFilesApiFp = function(configuration?: Configuration) {
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [relativePath] relative_path
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
-         * @param {string} [sha256] sha256
+         * @param {string} [relativePath] Filter results where relative_path matches value
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
+         * @param {string} [sha256] 
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -1609,11 +1705,11 @@ export const ContentFilesApiFactory = function (configuration?: Configuration, b
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [relativePath] relative_path
-         * @param {string} [repositoryVersion] repository_version
-         * @param {string} [repositoryVersionAdded] repository_version_added
-         * @param {string} [repositoryVersionRemoved] repository_version_removed
-         * @param {string} [sha256] sha256
+         * @param {string} [relativePath] Filter results where relative_path matches value
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+         * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
+         * @param {string} [sha256] 
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
@@ -1665,11 +1761,11 @@ export class ContentFilesApi extends BaseAPI {
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [relativePath] relative_path
-     * @param {string} [repositoryVersion] repository_version
-     * @param {string} [repositoryVersionAdded] repository_version_added
-     * @param {string} [repositoryVersionRemoved] repository_version_removed
-     * @param {string} [sha256] sha256
+     * @param {string} [relativePath] Filter results where relative_path matches value
+     * @param {string} [repositoryVersion] Repository Version referenced by HREF
+     * @param {string} [repositoryVersionAdded] Repository Version referenced by HREF
+     * @param {string} [repositoryVersionRemoved] Repository Version referenced by HREF
+     * @param {string} [sha256] 
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
@@ -1815,25 +1911,25 @@ export const DistributionsFileApiAxiosParamCreator = function (configuration?: C
         /**
          *  FileDistributions host File Publications which makes the metadata and the referenced File Content available to HTTP clients. Additionally, a FileDistribution with an associated FilePublication can be the target url of a File Remote , allowing another instance of Pulp to sync the content.
          * @summary List file distributions
-         * @param {string} [basePath] base_path
-         * @param {string} [basePathContains] base_path__contains
-         * @param {string} [basePathIcontains] base_path__icontains
-         * @param {string} [basePathIn] base_path__in
+         * @param {string} [basePath] 
+         * @param {string} [basePathContains] Filter results where base_path contains value
+         * @param {string} [basePathIcontains] Filter results where base_path contains value
+         * @param {Array<string>} [basePathIn] Filter results where base_path is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: Array<string>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/distributions/file/file/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -1866,8 +1962,8 @@ export const DistributionsFileApiAxiosParamCreator = function (configuration?: C
                 localVarQueryParameter['base_path__icontains'] = basePathIcontains;
             }
 
-            if (basePathIn !== undefined) {
-                localVarQueryParameter['base_path__in'] = basePathIn;
+            if (basePathIn) {
+                localVarQueryParameter['base_path__in'] = basePathIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (limit !== undefined) {
@@ -1886,8 +1982,8 @@ export const DistributionsFileApiAxiosParamCreator = function (configuration?: C
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -2163,25 +2259,25 @@ export const DistributionsFileApiFp = function(configuration?: Configuration) {
         /**
          *  FileDistributions host File Publications which makes the metadata and the referenced File Content available to HTTP clients. Additionally, a FileDistribution with an associated FilePublication can be the target url of a File Remote , allowing another instance of Pulp to sync the content.
          * @summary List file distributions
-         * @param {string} [basePath] base_path
-         * @param {string} [basePathContains] base_path__contains
-         * @param {string} [basePathIcontains] base_path__icontains
-         * @param {string} [basePathIn] base_path__in
+         * @param {string} [basePath] 
+         * @param {string} [basePathContains] Filter results where base_path contains value
+         * @param {string} [basePathIcontains] Filter results where base_path contains value
+         * @param {Array<string>} [basePathIn] Filter results where base_path is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileDistributionResponseList>> {
+        async list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: Array<string>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileDistributionResponseList>> {
             const localVarAxiosArgs = await DistributionsFileApiAxiosParamCreator(configuration).list(basePath, basePathContains, basePathIcontains, basePathIn, limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -2266,25 +2362,25 @@ export const DistributionsFileApiFactory = function (configuration?: Configurati
         /**
          *  FileDistributions host File Publications which makes the metadata and the referenced File Content available to HTTP clients. Additionally, a FileDistribution with an associated FilePublication can be the target url of a File Remote , allowing another instance of Pulp to sync the content.
          * @summary List file distributions
-         * @param {string} [basePath] base_path
-         * @param {string} [basePathContains] base_path__contains
-         * @param {string} [basePathIcontains] base_path__icontains
-         * @param {string} [basePathIn] base_path__in
+         * @param {string} [basePath] 
+         * @param {string} [basePathContains] Filter results where base_path contains value
+         * @param {string} [basePathIcontains] Filter results where base_path contains value
+         * @param {Array<string>} [basePathIn] Filter results where base_path is in a comma-separated list of values
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileDistributionResponseList> {
+        list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: Array<string>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileDistributionResponseList> {
             return DistributionsFileApiFp(configuration).list(basePath, basePathContains, basePathIcontains, basePathIn, limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2358,26 +2454,26 @@ export class DistributionsFileApi extends BaseAPI {
     /**
      *  FileDistributions host File Publications which makes the metadata and the referenced File Content available to HTTP clients. Additionally, a FileDistribution with an associated FilePublication can be the target url of a File Remote , allowing another instance of Pulp to sync the content.
      * @summary List file distributions
-     * @param {string} [basePath] base_path
-     * @param {string} [basePathContains] base_path__contains
-     * @param {string} [basePathIcontains] base_path__icontains
-     * @param {string} [basePathIn] base_path__in
+     * @param {string} [basePath] 
+     * @param {string} [basePathContains] Filter results where base_path contains value
+     * @param {string} [basePathIcontains] Filter results where base_path contains value
+     * @param {Array<string>} [basePathIn] Filter results where base_path is in a comma-separated list of values
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpLabelSelect] pulp_label_select
+     * @param {string} [pulpLabelSelect] Filter labels by search string
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DistributionsFileApi
      */
-    public list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: string, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(basePath?: string, basePathContains?: string, basePathIcontains?: string, basePathIn?: Array<string>, limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
         return DistributionsFileApiFp(this.configuration).list(basePath, basePathContains, basePathIcontains, basePathIn, limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2887,7 +2983,7 @@ export class ExportersFileExportsApi extends BaseAPI {
 export const ExportersFilesystemApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous delete task
          * @summary Delete a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {*} [options] Override http request option.
@@ -3000,11 +3096,11 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
          * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
          * @summary List file filesystem exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3012,7 +3108,7 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/exporters/file/filesystem/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -3049,8 +3145,8 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -3092,7 +3188,7 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
             };
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous partial update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {PatchedfileFileFilesystemExporter} patchedfileFileFilesystemExporter 
@@ -3218,7 +3314,7 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
             };
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {FileFileFilesystemExporter} fileFileFilesystemExporter 
@@ -3292,13 +3388,13 @@ export const ExportersFilesystemApiAxiosParamCreator = function (configuration?:
 export const ExportersFilesystemApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous delete task
          * @summary Delete a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async _delete(fileFileFilesystemExporterHref: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async _delete(fileFileFilesystemExporterHref: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersFilesystemApiAxiosParamCreator(configuration)._delete(fileFileFilesystemExporterHref, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -3323,11 +3419,11 @@ export const ExportersFilesystemApiFp = function(configuration?: Configuration) 
          * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
          * @summary List file filesystem exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3335,7 +3431,7 @@ export const ExportersFilesystemApiFp = function(configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileFilesystemExporterResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileFilesystemExporterResponseList>> {
             const localVarAxiosArgs = await ExportersFilesystemApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -3343,14 +3439,14 @@ export const ExportersFilesystemApiFp = function(configuration?: Configuration) 
             };
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous partial update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {PatchedfileFileFilesystemExporter} patchedfileFileFilesystemExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async partialUpdate(fileFileFilesystemExporterHref: string, patchedfileFileFilesystemExporter: PatchedfileFileFilesystemExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileFileFilesystemExporterResponse>> {
+        async partialUpdate(fileFileFilesystemExporterHref: string, patchedfileFileFilesystemExporter: PatchedfileFileFilesystemExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersFilesystemApiAxiosParamCreator(configuration).partialUpdate(fileFileFilesystemExporterHref, patchedfileFileFilesystemExporter, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -3374,14 +3470,14 @@ export const ExportersFilesystemApiFp = function(configuration?: Configuration) 
             };
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {FileFileFilesystemExporter} fileFileFilesystemExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async update(fileFileFilesystemExporterHref: string, fileFileFilesystemExporter: FileFileFilesystemExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileFileFilesystemExporterResponse>> {
+        async update(fileFileFilesystemExporterHref: string, fileFileFilesystemExporter: FileFileFilesystemExporter, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AsyncOperationResponse>> {
             const localVarAxiosArgs = await ExportersFilesystemApiAxiosParamCreator(configuration).update(fileFileFilesystemExporterHref, fileFileFilesystemExporter, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -3398,13 +3494,13 @@ export const ExportersFilesystemApiFp = function(configuration?: Configuration) 
 export const ExportersFilesystemApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     return {
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous delete task
          * @summary Delete a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        _delete(fileFileFilesystemExporterHref: string, options?: any): AxiosPromise<void> {
+        _delete(fileFileFilesystemExporterHref: string, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersFilesystemApiFp(configuration)._delete(fileFileFilesystemExporterHref, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3421,11 +3517,11 @@ export const ExportersFilesystemApiFactory = function (configuration?: Configura
          * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
          * @summary List file filesystem exporters
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
          * @param {string} [fields] A list of fields to include in the response.
@@ -3433,18 +3529,18 @@ export const ExportersFilesystemApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileFilesystemExporterResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileFilesystemExporterResponseList> {
             return ExportersFilesystemApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous partial update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {PatchedfileFileFilesystemExporter} patchedfileFileFilesystemExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        partialUpdate(fileFileFilesystemExporterHref: string, patchedfileFileFilesystemExporter: PatchedfileFileFilesystemExporter, options?: any): AxiosPromise<FileFileFilesystemExporterResponse> {
+        partialUpdate(fileFileFilesystemExporterHref: string, patchedfileFileFilesystemExporter: PatchedfileFileFilesystemExporter, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersFilesystemApiFp(configuration).partialUpdate(fileFileFilesystemExporterHref, patchedfileFileFilesystemExporter, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3460,14 +3556,14 @@ export const ExportersFilesystemApiFactory = function (configuration?: Configura
             return ExportersFilesystemApiFp(configuration).read(fileFileFilesystemExporterHref, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
-         * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+         * Trigger an asynchronous update task
          * @summary Update a file filesystem exporter
          * @param {string} fileFileFilesystemExporterHref 
          * @param {FileFileFilesystemExporter} fileFileFilesystemExporter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(fileFileFilesystemExporterHref: string, fileFileFilesystemExporter: FileFileFilesystemExporter, options?: any): AxiosPromise<FileFileFilesystemExporterResponse> {
+        update(fileFileFilesystemExporterHref: string, fileFileFilesystemExporter: FileFileFilesystemExporter, options?: any): AxiosPromise<AsyncOperationResponse> {
             return ExportersFilesystemApiFp(configuration).update(fileFileFilesystemExporterHref, fileFileFilesystemExporter, options).then((request) => request(axios, basePath));
         },
     };
@@ -3481,7 +3577,7 @@ export const ExportersFilesystemApiFactory = function (configuration?: Configura
  */
 export class ExportersFilesystemApi extends BaseAPI {
     /**
-     * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+     * Trigger an asynchronous delete task
      * @summary Delete a file filesystem exporter
      * @param {string} fileFileFilesystemExporterHref 
      * @param {*} [options] Override http request option.
@@ -3508,11 +3604,11 @@ export class ExportersFilesystemApi extends BaseAPI {
      * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
      * @summary List file filesystem exporters
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
      * @param {string} [fields] A list of fields to include in the response.
@@ -3521,12 +3617,12 @@ export class ExportersFilesystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ExportersFilesystemApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, fields?: string, excludeFields?: string, options?: any) {
         return ExportersFilesystemApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+     * Trigger an asynchronous partial update task
      * @summary Update a file filesystem exporter
      * @param {string} fileFileFilesystemExporterHref 
      * @param {PatchedfileFileFilesystemExporter} patchedfileFileFilesystemExporter 
@@ -3553,7 +3649,7 @@ export class ExportersFilesystemApi extends BaseAPI {
     }
 
     /**
-     * FilesystemExporters export content from a publication to a path on the file system.  WARNING: This feature is provided as a tech preview and may change in the future. Backwards compatibility is not guaranteed.
+     * Trigger an asynchronous update task
      * @summary Update a file filesystem exporter
      * @param {string} fileFileFilesystemExporterHref 
      * @param {FileFileFilesystemExporter} fileFileFilesystemExporter 
@@ -3689,19 +3785,19 @@ export const PublicationsFileApiAxiosParamCreator = function (configuration?: Co
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
-         * @param {string} [repositoryVersion] repository_version
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, repositoryVersion?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, repositoryVersion?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/publications/file/file/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -3735,27 +3831,37 @@ export const PublicationsFileApiAxiosParamCreator = function (configuration?: Co
             }
 
             if (pulpCreated !== undefined) {
-                localVarQueryParameter['pulp_created'] = pulpCreated;
+                localVarQueryParameter['pulp_created'] = (pulpCreated as any instanceof Date) ?
+                    (pulpCreated as any).toISOString() :
+                    pulpCreated;
             }
 
             if (pulpCreatedGt !== undefined) {
-                localVarQueryParameter['pulp_created__gt'] = pulpCreatedGt;
+                localVarQueryParameter['pulp_created__gt'] = (pulpCreatedGt as any instanceof Date) ?
+                    (pulpCreatedGt as any).toISOString() :
+                    pulpCreatedGt;
             }
 
             if (pulpCreatedGte !== undefined) {
-                localVarQueryParameter['pulp_created__gte'] = pulpCreatedGte;
+                localVarQueryParameter['pulp_created__gte'] = (pulpCreatedGte as any instanceof Date) ?
+                    (pulpCreatedGte as any).toISOString() :
+                    pulpCreatedGte;
             }
 
             if (pulpCreatedLt !== undefined) {
-                localVarQueryParameter['pulp_created__lt'] = pulpCreatedLt;
+                localVarQueryParameter['pulp_created__lt'] = (pulpCreatedLt as any instanceof Date) ?
+                    (pulpCreatedLt as any).toISOString() :
+                    pulpCreatedLt;
             }
 
             if (pulpCreatedLte !== undefined) {
-                localVarQueryParameter['pulp_created__lte'] = pulpCreatedLte;
+                localVarQueryParameter['pulp_created__lte'] = (pulpCreatedLte as any instanceof Date) ?
+                    (pulpCreatedLte as any).toISOString() :
+                    pulpCreatedLte;
             }
 
-            if (pulpCreatedRange !== undefined) {
-                localVarQueryParameter['pulp_created__range'] = pulpCreatedRange;
+            if (pulpCreatedRange) {
+                localVarQueryParameter['pulp_created__range'] = pulpCreatedRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (repositoryVersion !== undefined) {
@@ -3892,19 +3998,19 @@ export const PublicationsFileApiFp = function(configuration?: Configuration) {
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
-         * @param {string} [repositoryVersion] repository_version
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFilePublicationResponseList>> {
+        async list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFilePublicationResponseList>> {
             const localVarAxiosArgs = await PublicationsFileApiAxiosParamCreator(configuration).list(limit, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, repositoryVersion, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -3962,19 +4068,19 @@ export const PublicationsFileApiFactory = function (configuration?: Configuratio
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
-         * @param {string} [repositoryVersion] repository_version
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
+         * @param {string} [repositoryVersion] Repository Version referenced by HREF
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFilePublicationResponseList> {
+        list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFilePublicationResponseList> {
             return PublicationsFileApiFp(configuration).list(limit, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, repositoryVersion, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4029,20 +4135,20 @@ export class PublicationsFileApi extends BaseAPI {
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpCreated] pulp_created
-     * @param {string} [pulpCreatedGt] pulp_created__gt
-     * @param {string} [pulpCreatedGte] pulp_created__gte
-     * @param {string} [pulpCreatedLt] pulp_created__lt
-     * @param {string} [pulpCreatedLte] pulp_created__lte
-     * @param {string} [pulpCreatedRange] pulp_created__range
-     * @param {string} [repositoryVersion] repository_version
+     * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+     * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+     * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+     * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+     * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+     * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
+     * @param {string} [repositoryVersion] Repository Version referenced by HREF
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PublicationsFileApi
      */
-    public list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, repositoryVersion?: string, fields?: string, excludeFields?: string, options?: any) {
         return PublicationsFileApiFp(this.configuration).list(limit, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, repositoryVersion, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -4182,26 +4288,26 @@ export const RemotesFileApiAxiosParamCreator = function (configuration?: Configu
          *  FileRemote represents an external source of File Content.  The target url of a FileRemote must contain a file manifest, which contains the metadata for all files at the source.
          * @summary List file remotes
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
-         * @param {string} [pulpLastUpdated] pulp_last_updated
-         * @param {string} [pulpLastUpdatedGt] pulp_last_updated__gt
-         * @param {string} [pulpLastUpdatedGte] pulp_last_updated__gte
-         * @param {string} [pulpLastUpdatedLt] pulp_last_updated__lt
-         * @param {string} [pulpLastUpdatedLte] pulp_last_updated__lte
-         * @param {string} [pulpLastUpdatedRange] pulp_last_updated__range
+         * @param {string} [pulpLabelSelect] Filter labels by search string
+         * @param {string} [pulpLastUpdated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpLastUpdatedGt] Filter results where pulp_last_updated is greater than value
+         * @param {string} [pulpLastUpdatedGte] Filter results where pulp_last_updated is greater than or equal to value
+         * @param {string} [pulpLastUpdatedLt] Filter results where pulp_last_updated is less than value
+         * @param {string} [pulpLastUpdatedLte] Filter results where pulp_last_updated is less than or equal to value
+         * @param {Array<string>} [pulpLastUpdatedRange] Filter results where pulp_last_updated is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: Array<string>, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/remotes/file/file/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -4238,8 +4344,8 @@ export const RemotesFileApiAxiosParamCreator = function (configuration?: Configu
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -4259,27 +4365,37 @@ export const RemotesFileApiAxiosParamCreator = function (configuration?: Configu
             }
 
             if (pulpLastUpdated !== undefined) {
-                localVarQueryParameter['pulp_last_updated'] = pulpLastUpdated;
+                localVarQueryParameter['pulp_last_updated'] = (pulpLastUpdated as any instanceof Date) ?
+                    (pulpLastUpdated as any).toISOString() :
+                    pulpLastUpdated;
             }
 
             if (pulpLastUpdatedGt !== undefined) {
-                localVarQueryParameter['pulp_last_updated__gt'] = pulpLastUpdatedGt;
+                localVarQueryParameter['pulp_last_updated__gt'] = (pulpLastUpdatedGt as any instanceof Date) ?
+                    (pulpLastUpdatedGt as any).toISOString() :
+                    pulpLastUpdatedGt;
             }
 
             if (pulpLastUpdatedGte !== undefined) {
-                localVarQueryParameter['pulp_last_updated__gte'] = pulpLastUpdatedGte;
+                localVarQueryParameter['pulp_last_updated__gte'] = (pulpLastUpdatedGte as any instanceof Date) ?
+                    (pulpLastUpdatedGte as any).toISOString() :
+                    pulpLastUpdatedGte;
             }
 
             if (pulpLastUpdatedLt !== undefined) {
-                localVarQueryParameter['pulp_last_updated__lt'] = pulpLastUpdatedLt;
+                localVarQueryParameter['pulp_last_updated__lt'] = (pulpLastUpdatedLt as any instanceof Date) ?
+                    (pulpLastUpdatedLt as any).toISOString() :
+                    pulpLastUpdatedLt;
             }
 
             if (pulpLastUpdatedLte !== undefined) {
-                localVarQueryParameter['pulp_last_updated__lte'] = pulpLastUpdatedLte;
+                localVarQueryParameter['pulp_last_updated__lte'] = (pulpLastUpdatedLte as any instanceof Date) ?
+                    (pulpLastUpdatedLte as any).toISOString() :
+                    pulpLastUpdatedLte;
             }
 
-            if (pulpLastUpdatedRange !== undefined) {
-                localVarQueryParameter['pulp_last_updated__range'] = pulpLastUpdatedRange;
+            if (pulpLastUpdatedRange) {
+                localVarQueryParameter['pulp_last_updated__range'] = pulpLastUpdatedRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (fields !== undefined) {
@@ -4540,26 +4656,26 @@ export const RemotesFileApiFp = function(configuration?: Configuration) {
          *  FileRemote represents an external source of File Content.  The target url of a FileRemote must contain a file manifest, which contains the metadata for all files at the source.
          * @summary List file remotes
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
-         * @param {string} [pulpLastUpdated] pulp_last_updated
-         * @param {string} [pulpLastUpdatedGt] pulp_last_updated__gt
-         * @param {string} [pulpLastUpdatedGte] pulp_last_updated__gte
-         * @param {string} [pulpLastUpdatedLt] pulp_last_updated__lt
-         * @param {string} [pulpLastUpdatedLte] pulp_last_updated__lte
-         * @param {string} [pulpLastUpdatedRange] pulp_last_updated__range
+         * @param {string} [pulpLabelSelect] Filter labels by search string
+         * @param {string} [pulpLastUpdated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpLastUpdatedGt] Filter results where pulp_last_updated is greater than value
+         * @param {string} [pulpLastUpdatedGte] Filter results where pulp_last_updated is greater than or equal to value
+         * @param {string} [pulpLastUpdatedLt] Filter results where pulp_last_updated is less than value
+         * @param {string} [pulpLastUpdatedLte] Filter results where pulp_last_updated is less than or equal to value
+         * @param {Array<string>} [pulpLastUpdatedRange] Filter results where pulp_last_updated is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileRemoteResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileRemoteResponseList>> {
             const localVarAxiosArgs = await RemotesFileApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, pulpLastUpdated, pulpLastUpdatedGt, pulpLastUpdatedGte, pulpLastUpdatedLt, pulpLastUpdatedLte, pulpLastUpdatedRange, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -4645,26 +4761,26 @@ export const RemotesFileApiFactory = function (configuration?: Configuration, ba
          *  FileRemote represents an external source of File Content.  The target url of a FileRemote must contain a file manifest, which contains the metadata for all files at the source.
          * @summary List file remotes
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
-         * @param {string} [pulpLastUpdated] pulp_last_updated
-         * @param {string} [pulpLastUpdatedGt] pulp_last_updated__gt
-         * @param {string} [pulpLastUpdatedGte] pulp_last_updated__gte
-         * @param {string} [pulpLastUpdatedLt] pulp_last_updated__lt
-         * @param {string} [pulpLastUpdatedLte] pulp_last_updated__lte
-         * @param {string} [pulpLastUpdatedRange] pulp_last_updated__range
+         * @param {string} [pulpLabelSelect] Filter labels by search string
+         * @param {string} [pulpLastUpdated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpLastUpdatedGt] Filter results where pulp_last_updated is greater than value
+         * @param {string} [pulpLastUpdatedGte] Filter results where pulp_last_updated is greater than or equal to value
+         * @param {string} [pulpLastUpdatedLt] Filter results where pulp_last_updated is less than value
+         * @param {string} [pulpLastUpdatedLte] Filter results where pulp_last_updated is less than or equal to value
+         * @param {Array<string>} [pulpLastUpdatedRange] Filter results where pulp_last_updated is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileRemoteResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileRemoteResponseList> {
             return RemotesFileApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, pulpLastUpdated, pulpLastUpdatedGt, pulpLastUpdatedGte, pulpLastUpdatedLt, pulpLastUpdatedLte, pulpLastUpdatedRange, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4739,27 +4855,27 @@ export class RemotesFileApi extends BaseAPI {
      *  FileRemote represents an external source of File Content.  The target url of a FileRemote must contain a file manifest, which contains the metadata for all files at the source.
      * @summary List file remotes
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpLabelSelect] pulp_label_select
-     * @param {string} [pulpLastUpdated] pulp_last_updated
-     * @param {string} [pulpLastUpdatedGt] pulp_last_updated__gt
-     * @param {string} [pulpLastUpdatedGte] pulp_last_updated__gte
-     * @param {string} [pulpLastUpdatedLt] pulp_last_updated__lt
-     * @param {string} [pulpLastUpdatedLte] pulp_last_updated__lte
-     * @param {string} [pulpLastUpdatedRange] pulp_last_updated__range
+     * @param {string} [pulpLabelSelect] Filter labels by search string
+     * @param {string} [pulpLastUpdated] ISO 8601 formatted dates are supported
+     * @param {string} [pulpLastUpdatedGt] Filter results where pulp_last_updated is greater than value
+     * @param {string} [pulpLastUpdatedGte] Filter results where pulp_last_updated is greater than or equal to value
+     * @param {string} [pulpLastUpdatedLt] Filter results where pulp_last_updated is less than value
+     * @param {string} [pulpLastUpdatedLte] Filter results where pulp_last_updated is less than or equal to value
+     * @param {Array<string>} [pulpLastUpdatedRange] Filter results where pulp_last_updated is between two comma separated values
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RemotesFileApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, pulpLastUpdated?: string, pulpLastUpdatedGt?: string, pulpLastUpdatedGte?: string, pulpLastUpdatedLt?: string, pulpLastUpdatedLte?: string, pulpLastUpdatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any) {
         return RemotesFileApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, pulpLastUpdated, pulpLastUpdatedGt, pulpLastUpdatedGte, pulpLastUpdatedLt, pulpLastUpdatedLte, pulpLastUpdatedRange, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -4925,20 +5041,20 @@ export const RepositoriesFileApiAxiosParamCreator = function (configuration?: Co
          *  FileRepository represents a single file repository, to which content can be synced, added, or removed.
          * @summary List file repositorys
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/pulp/api/v3/repositories/file/file/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
@@ -4975,8 +5091,8 @@ export const RepositoriesFileApiAxiosParamCreator = function (configuration?: Co
                 localVarQueryParameter['name__icontains'] = nameIcontains;
             }
 
-            if (nameIn !== undefined) {
-                localVarQueryParameter['name__in'] = nameIn;
+            if (nameIn) {
+                localVarQueryParameter['name__in'] = nameIn.join(COLLECTION_FORMATS.csv);
             }
 
             if (nameStartswith !== undefined) {
@@ -5382,20 +5498,20 @@ export const RepositoriesFileApiFp = function(configuration?: Configuration) {
          *  FileRepository represents a single file repository, to which content can be synced, added, or removed.
          * @summary List file repositorys
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileRepositoryResponseList>> {
+        async list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedfileFileRepositoryResponseList>> {
             const localVarAxiosArgs = await RepositoriesFileApiAxiosParamCreator(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -5510,20 +5626,20 @@ export const RepositoriesFileApiFactory = function (configuration?: Configuratio
          *  FileRepository represents a single file repository, to which content can be synced, added, or removed.
          * @summary List file repositorys
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [name] name
-         * @param {string} [nameContains] name__contains
-         * @param {string} [nameIcontains] name__icontains
-         * @param {string} [nameIn] name__in
-         * @param {string} [nameStartswith] name__startswith
+         * @param {string} [name] 
+         * @param {string} [nameContains] Filter results where name contains value
+         * @param {string} [nameIcontains] Filter results where name contains value
+         * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+         * @param {string} [nameStartswith] Filter results where name starts with value
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpLabelSelect] pulp_label_select
+         * @param {string} [pulpLabelSelect] Filter labels by search string
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileRepositoryResponseList> {
+        list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedfileFileRepositoryResponseList> {
             return RepositoriesFileApiFp(configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5619,21 +5735,21 @@ export class RepositoriesFileApi extends BaseAPI {
      *  FileRepository represents a single file repository, to which content can be synced, added, or removed.
      * @summary List file repositorys
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [name] name
-     * @param {string} [nameContains] name__contains
-     * @param {string} [nameIcontains] name__icontains
-     * @param {string} [nameIn] name__in
-     * @param {string} [nameStartswith] name__startswith
+     * @param {string} [name] 
+     * @param {string} [nameContains] Filter results where name contains value
+     * @param {string} [nameIcontains] Filter results where name contains value
+     * @param {Array<string>} [nameIn] Filter results where name is in a comma-separated list of values
+     * @param {string} [nameStartswith] Filter results where name starts with value
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpLabelSelect] pulp_label_select
+     * @param {string} [pulpLabelSelect] Filter labels by search string
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RepositoriesFileApi
      */
-    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: string, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(limit?: number, name?: string, nameContains?: string, nameIcontains?: string, nameIn?: Array<string>, nameStartswith?: string, offset?: number, ordering?: string, pulpLabelSelect?: string, fields?: string, excludeFields?: string, options?: any) {
         return RepositoriesFileApiFp(this.configuration).list(limit, name, nameContains, nameIcontains, nameIn, nameStartswith, offset, ordering, pulpLabelSelect, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -5765,29 +5881,29 @@ export const RepositoriesFileVersionsApiAxiosParamCreator = function (configurat
          *  FileRepositoryVersion represents a single file repository version.
          * @summary List repository versions
          * @param {string} fileFileRepositoryHref 
-         * @param {string} [content] content
-         * @param {string} [contentIn] content__in
+         * @param {string} [content] Content Unit referenced by HREF
+         * @param {string} [contentIn] Content Unit referenced by HREF
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [number] number
-         * @param {string} [numberGt] number__gt
-         * @param {string} [numberGte] number__gte
-         * @param {string} [numberLt] number__lt
-         * @param {string} [numberLte] number__lte
-         * @param {string} [numberRange] number__range
+         * @param {number} [number] 
+         * @param {number} [numberGt] Filter results where number is greater than value
+         * @param {number} [numberGte] Filter results where number is greater than or equal to value
+         * @param {number} [numberLt] Filter results where number is less than value
+         * @param {number} [numberLte] Filter results where number is less than or equal to value
+         * @param {Array<number>} [numberRange] Filter results where number is between two comma separated values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list: async (fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: string, numberGt?: string, numberGte?: string, numberLt?: string, numberLte?: string, numberRange?: string, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
+        list: async (fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: number, numberGt?: number, numberGte?: number, numberLt?: number, numberLte?: number, numberRange?: Array<number>, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, fields?: string, excludeFields?: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'fileFileRepositoryHref' is not null or undefined
             if (fileFileRepositoryHref === null || fileFileRepositoryHref === undefined) {
                 throw new RequiredError('fileFileRepositoryHref','Required parameter fileFileRepositoryHref was null or undefined when calling list.');
@@ -5845,8 +5961,8 @@ export const RepositoriesFileVersionsApiAxiosParamCreator = function (configurat
                 localVarQueryParameter['number__lte'] = numberLte;
             }
 
-            if (numberRange !== undefined) {
-                localVarQueryParameter['number__range'] = numberRange;
+            if (numberRange) {
+                localVarQueryParameter['number__range'] = numberRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (offset !== undefined) {
@@ -5858,27 +5974,37 @@ export const RepositoriesFileVersionsApiAxiosParamCreator = function (configurat
             }
 
             if (pulpCreated !== undefined) {
-                localVarQueryParameter['pulp_created'] = pulpCreated;
+                localVarQueryParameter['pulp_created'] = (pulpCreated as any instanceof Date) ?
+                    (pulpCreated as any).toISOString() :
+                    pulpCreated;
             }
 
             if (pulpCreatedGt !== undefined) {
-                localVarQueryParameter['pulp_created__gt'] = pulpCreatedGt;
+                localVarQueryParameter['pulp_created__gt'] = (pulpCreatedGt as any instanceof Date) ?
+                    (pulpCreatedGt as any).toISOString() :
+                    pulpCreatedGt;
             }
 
             if (pulpCreatedGte !== undefined) {
-                localVarQueryParameter['pulp_created__gte'] = pulpCreatedGte;
+                localVarQueryParameter['pulp_created__gte'] = (pulpCreatedGte as any instanceof Date) ?
+                    (pulpCreatedGte as any).toISOString() :
+                    pulpCreatedGte;
             }
 
             if (pulpCreatedLt !== undefined) {
-                localVarQueryParameter['pulp_created__lt'] = pulpCreatedLt;
+                localVarQueryParameter['pulp_created__lt'] = (pulpCreatedLt as any instanceof Date) ?
+                    (pulpCreatedLt as any).toISOString() :
+                    pulpCreatedLt;
             }
 
             if (pulpCreatedLte !== undefined) {
-                localVarQueryParameter['pulp_created__lte'] = pulpCreatedLte;
+                localVarQueryParameter['pulp_created__lte'] = (pulpCreatedLte as any instanceof Date) ?
+                    (pulpCreatedLte as any).toISOString() :
+                    pulpCreatedLte;
             }
 
-            if (pulpCreatedRange !== undefined) {
-                localVarQueryParameter['pulp_created__range'] = pulpCreatedRange;
+            if (pulpCreatedRange) {
+                localVarQueryParameter['pulp_created__range'] = pulpCreatedRange.join(COLLECTION_FORMATS.csv);
             }
 
             if (fields !== undefined) {
@@ -6059,29 +6185,29 @@ export const RepositoriesFileVersionsApiFp = function(configuration?: Configurat
          *  FileRepositoryVersion represents a single file repository version.
          * @summary List repository versions
          * @param {string} fileFileRepositoryHref 
-         * @param {string} [content] content
-         * @param {string} [contentIn] content__in
+         * @param {string} [content] Content Unit referenced by HREF
+         * @param {string} [contentIn] Content Unit referenced by HREF
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [number] number
-         * @param {string} [numberGt] number__gt
-         * @param {string} [numberGte] number__gte
-         * @param {string} [numberLt] number__lt
-         * @param {string} [numberLte] number__lte
-         * @param {string} [numberRange] number__range
+         * @param {number} [number] 
+         * @param {number} [numberGt] Filter results where number is greater than value
+         * @param {number} [numberGte] Filter results where number is greater than or equal to value
+         * @param {number} [numberLt] Filter results where number is less than value
+         * @param {number} [numberLte] Filter results where number is less than or equal to value
+         * @param {Array<number>} [numberRange] Filter results where number is between two comma separated values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: string, numberGt?: string, numberGte?: string, numberLt?: string, numberLte?: string, numberRange?: string, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedRepositoryVersionResponseList>> {
+        async list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: number, numberGt?: number, numberGte?: number, numberLt?: number, numberLte?: number, numberRange?: Array<number>, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedRepositoryVersionResponseList>> {
             const localVarAxiosArgs = await RepositoriesFileVersionsApiAxiosParamCreator(configuration).list(fileFileRepositoryHref, content, contentIn, limit, number, numberGt, numberGte, numberLt, numberLte, numberRange, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, fields, excludeFields, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs = {...localVarAxiosArgs.options, url: (configuration?.basePath || basePath) + localVarAxiosArgs.url};
@@ -6141,29 +6267,29 @@ export const RepositoriesFileVersionsApiFactory = function (configuration?: Conf
          *  FileRepositoryVersion represents a single file repository version.
          * @summary List repository versions
          * @param {string} fileFileRepositoryHref 
-         * @param {string} [content] content
-         * @param {string} [contentIn] content__in
+         * @param {string} [content] Content Unit referenced by HREF
+         * @param {string} [contentIn] Content Unit referenced by HREF
          * @param {number} [limit] Number of results to return per page.
-         * @param {string} [number] number
-         * @param {string} [numberGt] number__gt
-         * @param {string} [numberGte] number__gte
-         * @param {string} [numberLt] number__lt
-         * @param {string} [numberLte] number__lte
-         * @param {string} [numberRange] number__range
+         * @param {number} [number] 
+         * @param {number} [numberGt] Filter results where number is greater than value
+         * @param {number} [numberGte] Filter results where number is greater than or equal to value
+         * @param {number} [numberLt] Filter results where number is less than value
+         * @param {number} [numberLte] Filter results where number is less than or equal to value
+         * @param {Array<number>} [numberRange] Filter results where number is between two comma separated values
          * @param {number} [offset] The initial index from which to return the results.
          * @param {string} [ordering] Which field to use when ordering the results.
-         * @param {string} [pulpCreated] pulp_created
-         * @param {string} [pulpCreatedGt] pulp_created__gt
-         * @param {string} [pulpCreatedGte] pulp_created__gte
-         * @param {string} [pulpCreatedLt] pulp_created__lt
-         * @param {string} [pulpCreatedLte] pulp_created__lte
-         * @param {string} [pulpCreatedRange] pulp_created__range
+         * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+         * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+         * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+         * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+         * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+         * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
          * @param {string} [fields] A list of fields to include in the response.
          * @param {string} [excludeFields] A list of fields to exclude from the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: string, numberGt?: string, numberGte?: string, numberLt?: string, numberLte?: string, numberRange?: string, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedRepositoryVersionResponseList> {
+        list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: number, numberGt?: number, numberGte?: number, numberLt?: number, numberLte?: number, numberRange?: Array<number>, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any): AxiosPromise<PaginatedRepositoryVersionResponseList> {
             return RepositoriesFileVersionsApiFp(configuration).list(fileFileRepositoryHref, content, contentIn, limit, number, numberGt, numberGte, numberLt, numberLte, numberRange, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, fields, excludeFields, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6214,30 +6340,30 @@ export class RepositoriesFileVersionsApi extends BaseAPI {
      *  FileRepositoryVersion represents a single file repository version.
      * @summary List repository versions
      * @param {string} fileFileRepositoryHref 
-     * @param {string} [content] content
-     * @param {string} [contentIn] content__in
+     * @param {string} [content] Content Unit referenced by HREF
+     * @param {string} [contentIn] Content Unit referenced by HREF
      * @param {number} [limit] Number of results to return per page.
-     * @param {string} [number] number
-     * @param {string} [numberGt] number__gt
-     * @param {string} [numberGte] number__gte
-     * @param {string} [numberLt] number__lt
-     * @param {string} [numberLte] number__lte
-     * @param {string} [numberRange] number__range
+     * @param {number} [number] 
+     * @param {number} [numberGt] Filter results where number is greater than value
+     * @param {number} [numberGte] Filter results where number is greater than or equal to value
+     * @param {number} [numberLt] Filter results where number is less than value
+     * @param {number} [numberLte] Filter results where number is less than or equal to value
+     * @param {Array<number>} [numberRange] Filter results where number is between two comma separated values
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [ordering] Which field to use when ordering the results.
-     * @param {string} [pulpCreated] pulp_created
-     * @param {string} [pulpCreatedGt] pulp_created__gt
-     * @param {string} [pulpCreatedGte] pulp_created__gte
-     * @param {string} [pulpCreatedLt] pulp_created__lt
-     * @param {string} [pulpCreatedLte] pulp_created__lte
-     * @param {string} [pulpCreatedRange] pulp_created__range
+     * @param {string} [pulpCreated] ISO 8601 formatted dates are supported
+     * @param {string} [pulpCreatedGt] Filter results where pulp_created is greater than value
+     * @param {string} [pulpCreatedGte] Filter results where pulp_created is greater than or equal to value
+     * @param {string} [pulpCreatedLt] Filter results where pulp_created is less than value
+     * @param {string} [pulpCreatedLte] Filter results where pulp_created is less than or equal to value
+     * @param {Array<string>} [pulpCreatedRange] Filter results where pulp_created is between two comma separated values
      * @param {string} [fields] A list of fields to include in the response.
      * @param {string} [excludeFields] A list of fields to exclude from the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RepositoriesFileVersionsApi
      */
-    public list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: string, numberGt?: string, numberGte?: string, numberLt?: string, numberLte?: string, numberRange?: string, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: string, fields?: string, excludeFields?: string, options?: any) {
+    public list(fileFileRepositoryHref: string, content?: string, contentIn?: string, limit?: number, number?: number, numberGt?: number, numberGte?: number, numberLt?: number, numberLte?: number, numberRange?: Array<number>, offset?: number, ordering?: string, pulpCreated?: string, pulpCreatedGt?: string, pulpCreatedGte?: string, pulpCreatedLt?: string, pulpCreatedLte?: string, pulpCreatedRange?: Array<string>, fields?: string, excludeFields?: string, options?: any) {
         return RepositoriesFileVersionsApiFp(this.configuration).list(fileFileRepositoryHref, content, contentIn, limit, number, numberGt, numberGte, numberLt, numberLte, numberRange, offset, ordering, pulpCreated, pulpCreatedGt, pulpCreatedGte, pulpCreatedLt, pulpCreatedLte, pulpCreatedRange, fields, excludeFields, options).then((request) => request(this.axios, this.basePath));
     }
 
