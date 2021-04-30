@@ -9156,8 +9156,10 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
             if (taskHref === null || taskHref === undefined) {
                 throw new RequiredError('taskHref','Required parameter taskHref was null or undefined when calling read.');
             }
+
+            // remove encodeURIComponent by hand since we don't want taskHref encoded
             const localVarPath = `{task_href}`
-                .replace(`{${"task_href"}}`, encodeURIComponent(String(taskHref)));
+                .replace(`{${"task_href"}}`, String(taskHref));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;

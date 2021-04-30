@@ -5228,8 +5228,10 @@ export const RepositoriesFileApiAxiosParamCreator = function (configuration?: Co
             if (repositorySyncURL === null || repositorySyncURL === undefined) {
                 throw new RequiredError('repositorySyncURL','Required parameter repositorySyncURL was null or undefined when calling sync.');
             }
+
+            // removing encodeURIComponent by hand since fileFileRepositoryHref should not be encoded
             const localVarPath = `{file_file_repository_href}sync/`
-                .replace(`{${"file_file_repository_href"}}`, encodeURIComponent(String(fileFileRepositoryHref)));
+                .replace(`{${"file_file_repository_href"}}`, String(fileFileRepositoryHref));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, 'https://example.com');
             let baseOptions;

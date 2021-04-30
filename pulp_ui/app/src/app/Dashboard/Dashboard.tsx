@@ -4,13 +4,59 @@ import { Table, TableHeader, TableBody, textCenter } from '@patternfly/react-tab
 import styles from '@patternfly/react-styles/css/components/Table/table';
 
 import * as PulpCoreClient from '@app/pulpcore-client';
-//import { Configuration } from '@app/js-client/configuration';
-//import { StatusApi } from '@app/js-client/api';
+import * as PulpFileClient from '@app/pulp_file-client';
 
-//const params = PulpCoreClient.ConfigurationParameters();
-const configuration = new PulpCoreClient.Configuration({username: 'admin', password: 'password', basePath: 'http://localhost:9000'});
-const statusAPI = new PulpCoreClient.StatusApi({configuration: configuration});
-const resp = statusAPI.statusRead();
+const pulpConfig = new PulpCoreClient.Configuration({username: 'admin', password: 'password', basePath: 'http://localhost:9000'});
+const fileConfig = new PulpFileClient.Configuration({username: 'admin', password: 'password', basePath: 'http://localhost:9000'});
+
+const statusApi = new PulpCoreClient.StatusApi(pulpConfig);
+const taskApi = new PulpCoreClient.TasksApi(pulpConfig)
+const repoApi = new PulpFileClient.RepositoriesFileApi(fileConfig);
+const remoteApi = new PulpFileClient.RemotesFileApi(fileConfig)
+const FINISHED_TASK_STATES = ["skipped", "completed", "failed", "canceled"]
+
+const sleep = function(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
+const monitorTask = async function(taskHref: string) {
+  while(true) {
+    let result = await taskApi.read(taskHref)
+    if(FINISHED_TASK_STATES.indexOf(result["data"]["state"]) > -1) {
+      return result
+    }
+    await sleep(500)
+  }
+}
+
+//let resp = statusApi.statusRead()
+//resp.then((result) => {
+    //console.log("Status:")
+    //console.log(result["data"])
+//})
+
+//repoApi.list().then((result) => {
+  //console.log("Repositories:")
+  //console.log(result["data"]["results"])
+//})
+
+let testid = Math.random()
+remoteApi.create({name: "test-remote-" + testid, url: "https://fixtures.pulpproject.org/file/PULP_MANIFEST"}).then((remoteResult) => {
+  let remote = remoteResult["data"]
+
+  repoApi.create({name: "test-repo-" + testid, remote: remote["pulp_href"]}).then((repoResult) => {
+    console.log("Repo create result:")
+    console.log(repoResult["data"])
+
+    // do a sync
+    repoApi.sync(repoResult["data"]["pulp_href"], {}).then((syncResult) => {
+      monitorTask(syncResult["data"]["task"]).then((taskResult) => {
+        console.log("Repo sync result:")
+        console.log(taskResult["data"])
+      })
+    })
+  })
+})
 
     const state = {
       columns: [
